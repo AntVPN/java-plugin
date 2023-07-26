@@ -1,6 +1,7 @@
 package rip.snake.antivpn.core.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -13,6 +14,11 @@ public class GsonParser {
      * The Gson instance.
      */
     private final Gson gson = new Gson();
+
+    /**
+     * The pretty Gson instance.
+     */
+    private final Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 
     /**
      * Parse a json string to a class.
@@ -34,6 +40,16 @@ public class GsonParser {
      */
     public String toJson(Object object) {
         return gson.toJson(object);
+    }
+
+    /**
+     * Parse object to pretty json.
+     *
+     * @param object the object.
+     * @return the json string.
+     */
+    public String toPrettyJson(Object object) {
+        return prettyGson.toJson(object);
     }
 
 }

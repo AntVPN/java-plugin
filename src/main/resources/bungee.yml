@@ -1,4 +1,4 @@
 name: ServerAntiVPN
 version: ${project.version}
-main: rip.snake.antivpn.bungee.AntiVPN
+main: rip.snake.antivpn.bungee.ServerAntiVPN
 author: iSnakeBuzz_

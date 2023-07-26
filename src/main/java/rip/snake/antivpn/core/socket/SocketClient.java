@@ -2,9 +2,12 @@ package rip.snake.antivpn.core.socket;
 
 import lombok.Data;
 import rip.snake.antivpn.core.data.DataResponse;
+import rip.snake.antivpn.core.function.WatcherFunction;
+import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
 
 import java.net.http.WebSocket;
+import java.net.http.WebSocketHandshakeException;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -35,8 +38,10 @@ public class SocketClient implements WebSocket.Listener {
         var response = GsonParser.fromJson(data.toString(), DataResponse.class);
 
         try {
-            // Call the function from the waiting responses
-            this.socketManager.getFunction(response.getUid()).call(response);
+            WatcherFunction<DataResponse> watcherFunction = WatcherFunction.getWatcherFunction(response.getUid(), DataResponse.class);
+            if (watcherFunction == null) return WebSocket.Listener.super.onText(webSocket, data, last);
+
+            watcherFunction.call(response);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -46,6 +51,12 @@ public class SocketClient implements WebSocket.Listener {
 
     @Override
     public void onError(WebSocket webSocket, Throwable error) {
+
+        if (error instanceof WebSocketHandshakeException) {
+            Console.error("The secret is invalid, please check your config.yml");
+            return;
+        }
+
         webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "Closing");
         WebSocket.Listener.super.onError(webSocket, error);
     }
