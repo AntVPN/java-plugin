@@ -26,9 +26,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
-    implementation("org.bstats:bstats-bungeecord:3.0.2")
-    implementation("org.bstats:bstats-velocity:3.0.2")
-
     testCompileOnly 'org.projectlombok:lombok:1.18.28'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
     annotationProcessor "com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"
@@ -53,6 +50,32 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+tasks.register("processVelocityPluginJson") {
+    doLast {
+        def versionToReplace = project.version.toString()
+        def velocityPluginJsonFile = file("build/classes/java/main/velocity-plugin.json")
+
+        if (velocityPluginJsonFile.exists()) {
+            def velocityPluginJsonContent = velocityPluginJsonFile.text.replaceAll(/\$\{VERSION\}/, versionToReplace)
+            velocityPluginJsonFile.text = velocityPluginJsonContent
+        }
+    }
+}
+
+processResources {
+    dependsOn tasks.processVelocityPluginJson
+
+    doLast {
+        def versionToReplace = project.version.toString()
+        def bungeeYmlFile = file("${destinationDir}/bungee.yml")
+
+        if (bungeeYmlFile.exists()) {
+            def bungeeYmlContent = bungeeYmlFile.text.replaceAll(/\$\{VERSION\}/, versionToReplace)
+            bungeeYmlFile.text = bungeeYmlContent
+        }
+    }
+}
+
 def templateSource = file('src/main/templates')
 def templateDest = layout.buildDirectory.dir('generated/sources/templates')
 def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
@@ -67,7 +90,6 @@ def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
 }
 
 sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
-
 
 rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 project.eclipse.synchronizationTasks(generateTemplates)

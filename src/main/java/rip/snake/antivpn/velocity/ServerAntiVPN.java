@@ -7,15 +7,18 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.velocity.listeners.VelocityPlayerListener;
+import rip.snake.antivpn.velocity.metrics.Metrics;
 
 import java.nio.file.Path;
 
 @Plugin(
         id = "serverantivpn",
+        version = "${VERSION}",
+        authors = {"iSnakeBuzz_"},
+        url = "https://anti.snake.rip",
         name = "AntiVPN"
 )
 public class ServerAntiVPN {

@@ -3,8 +3,8 @@ package rip.snake.antivpn.bungee;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.bstats.bungeecord.Metrics;
 import rip.snake.antivpn.bungee.listeners.BungeePlayerListener;
+import rip.snake.antivpn.bungee.metrics.Metrics;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.config.VPNConfig;
 
