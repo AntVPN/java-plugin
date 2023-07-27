@@ -6,7 +6,10 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import net.kyori.adventure.text.Component;
 import rip.snake.antivpn.core.Service;
-import rip.snake.antivpn.core.utils.Console;
+import rip.snake.antivpn.core.data.DataResponse;
+import rip.snake.antivpn.core.function.WatcherFunction;
+
+import java.util.Objects;
 
 public class VelocityPlayerListener {
 
@@ -22,7 +25,9 @@ public class VelocityPlayerListener {
         String address = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
 
         try {
-            service.getSocketManager().verifyAddress(address).then(result -> {
+            WatcherFunction<DataResponse> response = service.getSocketManager().verifyAddress(address);
+
+            Objects.requireNonNull(response, "Server is offline :C").then(result -> {
                 if (result == null || result.isValid()) {
                     continuation.resume();
                     return;
@@ -33,6 +38,7 @@ public class VelocityPlayerListener {
             });
         } catch (Exception e) {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
+            continuation.resume();
         }
     }
 

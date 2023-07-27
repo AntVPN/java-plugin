@@ -25,15 +25,10 @@ public class SocketClient implements WebSocket.Listener {
     public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
         // Parse the data
         var response = GsonParser.fromJson(data.toString(), DataResponse.class);
-        Console.debug("RECEIVED: %s", data);
 
         try {
             WatcherFunction<DataResponse> watcherFunction = WatcherFunction.getWatcherFunction(response.getUid());
-
-            Console.debug("WatcherFunction: %s", watcherFunction);
             if (watcherFunction == null) return WebSocket.Listener.super.onText(webSocket, data, last);
-
-            Console.debug("Calling Function");
             watcherFunction.call(response);
         } catch (Exception e) {
             throw new RuntimeException(e);
