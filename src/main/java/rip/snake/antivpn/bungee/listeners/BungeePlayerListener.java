@@ -30,7 +30,7 @@ public class BungeePlayerListener implements Listener {
                 event.setCancelReason(TextComponent.fromLegacyText(plugin.getConfig().getDetectMessage()));
                 event.setCancelled(true);
             }).await();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             plugin.getLogger().severe("Failed to verify address " + address + "! " + e.getMessage());
         }
     }

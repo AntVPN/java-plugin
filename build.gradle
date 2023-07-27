@@ -45,6 +45,9 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release = targetJavaVersion
     }
+
+    // Allow UTF-8
+    options.encoding = 'UTF-8'
 }
 
 def templateSource = file('src/main/templates')
@@ -61,6 +64,8 @@ def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
 }
 
 sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
+
+
 
 rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 project.eclipse.synchronizationTasks(generateTemplates)

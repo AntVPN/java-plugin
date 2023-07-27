@@ -4,9 +4,11 @@ import lombok.Data;
 import org.slf4j.Logger;
 import rip.snake.antivpn.core.config.VPNConfig;
 import rip.snake.antivpn.core.socket.SocketManager;
+import rip.snake.antivpn.core.tasks.TimeoutTask;
 import rip.snake.antivpn.core.utils.ConfigUtils;
 
 import java.nio.file.Path;
+import java.util.Timer;
 
 @Data
 public class Service {
@@ -16,11 +18,14 @@ public class Service {
     private final Path home;
     private final Logger logger;
 
+    private final Timer timer;
     private final VPNConfig vpnConfig;
     private final SocketManager socketManager;
 
     public Service(Logger logger, Path home) {
         INSTANCE = this;
+
+        this.timer = new Timer();
 
         this.logger = logger;
         this.home = home;
@@ -30,7 +35,7 @@ public class Service {
     }
 
     public void onLoad() {
-        this.socketManager.open();
+        this.timer.scheduleAtFixedRate(new TimeoutTask(this), 0, 8000);
     }
 
     public void onDisable() {

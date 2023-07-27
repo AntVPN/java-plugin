@@ -2,7 +2,9 @@ package rip.snake.antivpn.core.function;
 
 
 import rip.snake.antivpn.core.utils.Callback;
+import rip.snake.antivpn.core.utils.Console;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,13 +38,9 @@ public class WatcherFunction<T> {
         this.uid = uid;
     }
 
-    public static <T> WatcherFunction<T> getWatcherFunction(String key, Class<T> valueType) {
-        WatcherFunction<?> watcherFunction = WatcherFunction.waitingResponses.getOrDefault(key, null);
-        if (valueType.isInstance(watcherFunction)) {
-            //noinspection unchecked
-            return (WatcherFunction<T>) watcherFunction;
-        }
-        return null;
+    @SuppressWarnings("unchecked")
+    public static <T> WatcherFunction<T> getWatcherFunction(String key) {
+        return (WatcherFunction<T>) WatcherFunction.waitingResponses.getOrDefault(key, null);
     }
 
     public static <T> WatcherFunction<T> createFunction(String uid) {
@@ -89,13 +87,13 @@ public class WatcherFunction<T> {
 
     // Call the function and notify all threads
     private void call() {
+        // Set the function as called
+        this.called = true;
+
         // Notify all threads to unlock them
         synchronized (lock) {
             lock.notifyAll();
         }
-
-        // Set the function as called
-        this.called = true;
 
         // Remove the function from the waiting responses
         waitingResponses.remove(this.uid);
