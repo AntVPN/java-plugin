@@ -14,6 +14,7 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.net.http.WebSocketHandshakeException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletionException;
 
 /**
  * The socket manager.
@@ -73,9 +74,21 @@ public class SocketManager {
                     .header("Authorization", "Bearer " + service.getVpnConfig().getSecret())
                     .buildAsync(URI.create("wss://anti.snake.rip/live_checker"), new SocketClient(this))
                     .join();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Console.error("Your secret is invalid or ");
+        } catch (CompletionException ex) {
+            if (!(ex.getCause() instanceof WebSocketHandshakeException)) return null;
+
+            WebSocketHandshakeException throwable = (WebSocketHandshakeException) ex.getCause();
+            int statusCode = throwable.getResponse().statusCode();
+
+            if (statusCode == 401) {
+                Console.error("Failed to authenticate with the server, please check your secret in the config.json file.");
+            } else if (statusCode >= 500 && statusCode <= 505) {
+                Console.error("Our server is restarting or something related... If this still happening after 10 minutes please report it on discord.snake.rip. Useful data: (HttpStatus: %s)", statusCode);
+            } else {
+                Console.error("Report this to the developer: %s", throwable.getClass().getSimpleName());
+                throwable.printStackTrace();
+            }
+
             return null;
         }
     }
@@ -93,7 +106,7 @@ public class SocketManager {
 
     public void reconnect() {
         if (isConnected()) return;
-        Console.debug("Reconnecting socket");
+        Console.error("Trying to reconnect to the socket...");
         this.socket = initialize(this.service);
     }
 }

@@ -22,22 +22,6 @@ public class SocketClient implements WebSocket.Listener {
     }
 
     @Override
-    public void onOpen(WebSocket webSocket) {
-        WebSocket.Listener.super.onOpen(webSocket);
-    }
-
-    @Override
-    public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
-        if (statusCode == 401 || statusCode == 402) {
-            Console.error("Please use a valid API key in the config.yml file.");
-            return null;
-        }
-
-        Console.log("Socket closed with status code %d: %s", statusCode, reason);
-        return WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
-    }
-
-    @Override
     public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
         // Parse the data
         var response = GsonParser.fromJson(data.toString(), DataResponse.class);
@@ -59,8 +43,14 @@ public class SocketClient implements WebSocket.Listener {
     }
 
     @Override
-    public void onError(WebSocket webSocket, Throwable error) {
-        Console.error("An error occurred in the socket: " + error.getMessage());
-        WebSocket.Listener.super.onError(webSocket, error);
+    public void onOpen(WebSocket webSocket) {
+        Console.fine("We are now connected to the socket.");
+        WebSocket.Listener.super.onOpen(webSocket);
+    }
+
+    @Override
+    public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
+        Console.error("We lost connection to the socket. Trying to reconnecting...");
+        return WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
     }
 }

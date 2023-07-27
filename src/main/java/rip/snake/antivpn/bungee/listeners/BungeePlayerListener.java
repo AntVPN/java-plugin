@@ -20,11 +20,9 @@ public class BungeePlayerListener implements Listener {
     public void onPreLogin(PreLoginEvent event) {
         if (event.isCancelled() || event.getConnection() == null) return;
         String address = event.getConnection().getSocketAddress().toString();
-        Console.debug("PreLoginEvent: %s", address);
 
         try {
             plugin.getService().getSocketManager().verifyAddress(address).then(result -> {
-                Console.debug("PreLoginEvent: %s -> %s", address, result);
                 if (result == null || result.isValid()) return;
 
                 event.setCancelReason(TextComponent.fromLegacyText(plugin.getConfig().getDetectMessage()));

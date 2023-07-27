@@ -10,7 +10,7 @@ import rip.snake.antivpn.core.utils.Console;
 
 public class VelocityPlayerListener {
 
-    private Service service;
+    private final Service service;
 
     public VelocityPlayerListener(Service service) {
         this.service = service;
@@ -20,19 +20,20 @@ public class VelocityPlayerListener {
     public void onAsyncPreLogin(PreLoginEvent event, Continuation continuation) {
         if (!event.getResult().isAllowed()) return;
         String address = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
-        Console.debug("PreLoginEvent: %s", address);
 
-        service.getSocketManager().verifyAddress(address).then(result -> {
-            Console.debug("PreLoginEvent: %s -> %s", address, result);
+        try {
+            service.getSocketManager().verifyAddress(address).then(result -> {
+                if (result == null || result.isValid()) {
+                    continuation.resume();
+                    return;
+                }
 
-            if (result == null || result.isValid()) {
+                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Component.text(service.getVpnConfig().getDetectMessage())));
                 continuation.resume();
-                return;
-            }
-
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(Component.text(service.getVpnConfig().getDetectMessage())));
-            continuation.resume();
-        });
+            });
+        } catch (Exception e) {
+            service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
+        }
     }
 
 }
