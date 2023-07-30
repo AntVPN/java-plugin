@@ -8,10 +8,12 @@ public class DataRequest {
 
     private String uid;
     private String address;
+    private String username;
 
-    public DataRequest(String address) {
+    public DataRequest(String address, String username) {
         this.uid = IDGenerator.generateUniqueID();
         this.address = address;
+        this.username = username;
     }
 
 }

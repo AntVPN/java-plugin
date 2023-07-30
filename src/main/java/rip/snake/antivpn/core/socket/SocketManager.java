@@ -51,13 +51,13 @@ public class SocketManager {
      * @param address The address to verify
      * @return The response
      */
-    public WatcherFunction<DataResponse> verifyAddress(String address) {
+    public WatcherFunction<DataResponse> verifyAddress(String address, @Nullable String username) {
         if (this.socket == null || this.socket.isInputClosed()) return null;
 
         // Clean the address
         address = StringUtils.cleanAddress(address);
 
-        DataRequest request = new DataRequest(address);
+        DataRequest request = new DataRequest(address, username == null ? "N/A" : username);
         this.socket.sendText(GsonParser.toJson(request), true);
 
         return WatcherFunction.createFunction(request.getUid());

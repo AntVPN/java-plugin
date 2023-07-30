@@ -6,6 +6,7 @@ import lombok.Data;
 public class DataResponse {
 
     private String uid;
+    // Returns if the IP is a player or not.
     private boolean valid;
 
     public String toString() {

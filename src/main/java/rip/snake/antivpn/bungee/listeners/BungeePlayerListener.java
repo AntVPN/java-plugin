@@ -10,6 +10,7 @@ import rip.snake.antivpn.core.data.DataResponse;
 import rip.snake.antivpn.core.function.WatcherFunction;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class BungeePlayerListener implements Listener {
 
@@ -24,17 +25,21 @@ public class BungeePlayerListener implements Listener {
         if (event.isCancelled() || event.getConnection() == null) return;
         String address = event.getConnection().getSocketAddress().toString();
 
+        event.registerIntent(this.plugin);
+
         try {
-            WatcherFunction<DataResponse> response = plugin.getService().getSocketManager().verifyAddress(address);
+            WatcherFunction<DataResponse> response = this.plugin.getService().getSocketManager().verifyAddress(address, event.getConnection().getName());
 
             Objects.requireNonNull(response, "Server is offline :C").then(result -> {
                 if (result == null || result.isValid()) return;
 
-                event.setCancelReason(TextComponent.fromLegacyText(plugin.getConfig().getDetectMessage()));
+                event.setCancelReason(TextComponent.fromLegacyText(this.plugin.getConfig().getDetectMessage()));
                 event.setCancelled(true);
-            }).await();
+                event.completeIntent(this.plugin);
+            });
         } catch (Exception e) {
-            plugin.getLogger().severe("Failed to verify address " + address + "! " + e.getMessage());
+            this.plugin.getLogger().severe("Failed to verify address " + address + "! " + e.getMessage());
+            event.completeIntent(this.plugin);
         }
     }
 

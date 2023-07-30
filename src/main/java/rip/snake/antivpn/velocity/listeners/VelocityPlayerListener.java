@@ -25,7 +25,7 @@ public class VelocityPlayerListener {
         String address = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
 
         try {
-            WatcherFunction<DataResponse> response = service.getSocketManager().verifyAddress(address);
+            WatcherFunction<DataResponse> response = service.getSocketManager().verifyAddress(address, event.getUsername());
 
             Objects.requireNonNull(response, "Server is offline :C").then(result -> {
                 if (result == null || result.isValid()) {
