@@ -90,12 +90,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <!-- Modify this line to target the loader you wish to use. -->
-            <artifactId>configurate-yaml</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.30</version>
@@ -106,11 +100,6 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
         </dependency>
     </dependencies>
 </project>

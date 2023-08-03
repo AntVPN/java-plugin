@@ -8,7 +8,6 @@ import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
 import rip.snake.antivpn.core.utils.StringUtils;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
@@ -24,7 +23,7 @@ public class SocketManager {
     private static final String PING = "PING";
 
     private final Service service;
-    private @Nullable WebSocket socket;
+    private WebSocket socket;
 
     /**
      * Initializing the socket.
@@ -51,7 +50,7 @@ public class SocketManager {
      * @param address The address to verify
      * @return The response
      */
-    public WatcherFunction<DataResponse> verifyAddress(String address, @Nullable String username) {
+    public WatcherFunction<DataResponse> verifyAddress(String address, String username) {
         if (this.socket == null || this.socket.isInputClosed()) return null;
 
         // Clean the address

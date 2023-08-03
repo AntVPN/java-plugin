@@ -1,7 +1,5 @@
 package rip.snake.antivpn.core.utils;
 
-import javax.annotation.Nullable;
-
 /**
  * Callback interface for async functions
  *
@@ -15,6 +13,6 @@ public interface Callback<T> {
      * @param calling The calling object
      * @throws Exception If an error occurs
      */
-    void call(@Nullable T calling) throws Exception;
+    void call(T calling) throws Exception;
 
 }
