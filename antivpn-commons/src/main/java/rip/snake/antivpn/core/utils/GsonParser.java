@@ -13,12 +13,12 @@ public class GsonParser {
     /**
      * The Gson instance.
      */
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     /**
      * The pretty Gson instance.
      */
-    private final Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson prettyGson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
     /**
      * Parse a json string to a class.
