@@ -4,7 +4,8 @@
   "version": "${ANTIVPN_VERSION}-b${BUILD_NUMBER}",
   "url": "https://anti.snake.rip",
   "authors": [
-    "iSnakeBuzz_"
+    "iSnakeBuzz_",
+    "gatogamer_"
   ],
   "dependencies": [],
   "main": "rip.snake.antivpn.velocity.ServerAntiVPN"
