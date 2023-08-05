@@ -1,4 +1,4 @@
 name: ServerAntiVPN
-version: ${VERSION}
+version: ${ANTIVPN_VERSION}-b${BUILD_NUMBER}
 main: rip.snake.antivpn.bungee.ServerAntiVPN
 author: iSnakeBuzz_

@@ -20,7 +20,7 @@
     </properties>
 
     <build>
-        <finalName>AntiVPN-${project.version}</finalName>
+        <finalName>AntiVPN-${ANTIVPN_VERSION}-b${BUILD_NUMBER}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

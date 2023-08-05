@@ -6,12 +6,15 @@
 
     <groupId>rip.snake</groupId>
     <artifactId>antivpn-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>AntiVPN Parent</name>
     <description>Free AntiVPN.</description>
+
     <properties>
+        <BUILD_NUMBER>1</BUILD_NUMBER>
+        <ANTIVPN_VERSION>1.0.1-BETA</ANTIVPN_VERSION>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
