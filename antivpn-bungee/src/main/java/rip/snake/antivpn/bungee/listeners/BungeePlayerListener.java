@@ -10,7 +10,6 @@ import rip.snake.antivpn.core.data.DataResponse;
 import rip.snake.antivpn.core.function.WatcherFunction;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 public class BungeePlayerListener implements Listener {
 
@@ -31,7 +30,10 @@ public class BungeePlayerListener implements Listener {
             WatcherFunction<DataResponse> response = this.plugin.getService().getSocketManager().verifyAddress(address, event.getConnection().getName());
 
             Objects.requireNonNull(response, "Server is offline :C").then(result -> {
-                if (result == null || result.isValid()) return;
+                if (result == null || result.isValid()) {
+                    event.completeIntent(this.plugin);
+                    return;
+                }
 
                 event.setCancelReason(TextComponent.fromLegacyText(this.plugin.getConfig().getDetectMessage()));
                 event.setCancelled(true);
