@@ -21,4 +21,4 @@ We will accept Pull Requests that are really useful or bug fixes. No stuff like 
 
 ## License
 
-ServerAniVPN is released under the [acá poné la licencia xd](LICENSE).
+ServerAniVPN is released under the [MIT](LICENSE) license.
