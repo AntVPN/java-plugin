@@ -69,7 +69,7 @@ public class SocketManager {
         try {
             var connection_url = URI.create("wss://connection.antivpn.io/live_checker");
 
-            Map<String, String> httpHeaders = new HashMap<String, String>();
+            Map<String, String> httpHeaders = new HashMap<>();
 
             // User-Agent and Authorization headers
             httpHeaders.put("User-Agent", "AntiVPN-Server/" + service.getVersion());
@@ -102,7 +102,7 @@ public class SocketManager {
     }
 
     public void sendPing() {
-        if (this.isConnected()) return;
+        if (!this.isConnected()) return;
         this.socket.sendPing();
     }
 
