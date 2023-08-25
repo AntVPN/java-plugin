@@ -1,51 +1,81 @@
 package rip.snake.antivpn.core.socket;
 
-import lombok.Data;
+import lombok.Getter;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 import rip.snake.antivpn.core.data.DataResponse;
 import rip.snake.antivpn.core.function.WatcherFunction;
 import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
 
-import java.net.http.WebSocket;
-import java.util.concurrent.CompletionStage;
+import java.net.URI;
+import java.util.Map;
 
 /**
  * This class is used to manage the socket client.
  */
-@Data
-public class SocketClient implements WebSocket.Listener {
+@Getter
+public class SocketClient extends WebSocketClient {
 
-    private final SocketManager socketManager;
+    private boolean connecting = true;
 
-    public SocketClient(SocketManager socketManager) {
-        this.socketManager = socketManager;
+    public SocketClient(URI serverUri, Map<String, String> httpHeaders) {
+        super(serverUri, httpHeaders);
+        this.setTcpNoDelay(true);
     }
 
     @Override
-    public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
-        // Parse the data
-        var response = GsonParser.fromJson(data.toString(), DataResponse.class);
+    public void connect() {
+        this.connecting = true;
+        super.connect();
+    }
 
+    @Override
+    public void reconnect() {
+        this.connecting = true;
+        super.reconnect();
+    }
+
+    @Override
+    public void onMessage(String message) {
         try {
+            // Parse the data
+            var response = GsonParser.fromJson(message, DataResponse.class);
+
             WatcherFunction<DataResponse> watcherFunction = WatcherFunction.getWatcherFunction(response.getUid());
-            if (watcherFunction == null) return WebSocket.Listener.super.onText(webSocket, data, last);
+            if (watcherFunction == null) return;
+
             watcherFunction.call(response);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        return WebSocket.Listener.super.onText(webSocket, data, last);
     }
 
     @Override
-    public void onOpen(WebSocket webSocket) {
-        Console.fine("We are now connected to the socket.");
-        WebSocket.Listener.super.onOpen(webSocket);
+    public void onOpen(ServerHandshake handshake) {
+        this.connecting = false;
+        Console.fine("Connected to the AntiVPN Server.");
     }
 
     @Override
-    public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
-        Console.error("We lost connection to the socket. Trying to reconnecting...");
-        return WebSocket.Listener.super.onClose(webSocket, statusCode, reason);
+    public void onClose(int code, String reason, boolean remote) {
+        this.connecting = false;
+        if (reason == null || reason.isEmpty()) reason = "Unknown";
+
+        Console.error("Disconnected from the AntiVPN Server. (Code: %s, Reason: %s)", code, reason);
+        this.close();
     }
+
+    @Override
+    public void onError(Exception e) {
+        this.connecting = false;
+        Console.error("An error occurred, please report this to the developer. (Error: %s)", e.getMessage());
+        e.printStackTrace();
+    }
+
+    public boolean isConnected() {
+        if (this.isClosed()) return false;
+        return this.isOpen() && !this.isClosing();
+    }
+
 }

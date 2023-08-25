@@ -5,6 +5,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
@@ -33,8 +34,9 @@ public class ServerAntiVPN {
         this.server = server;
         this.logger = logger;
         this.metricsFactory = metricsFactory;
+        PluginContainer container = server.getPluginManager().getPlugin("serverantivpn").orElseThrow(() -> new RuntimeException("Failed to get plugin container"));
 
-        this.service = new Service(logger, pluginData);
+        this.service = new Service(logger, pluginData, container.getDescription().getVersion().orElse("unknown"));
     }
 
     @Subscribe

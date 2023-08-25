@@ -17,24 +17,27 @@ public class Service {
 
     private final Path home;
     private final Logger logger;
+    private final String version;
 
     private final Timer timer;
     private final VPNConfig vpnConfig;
     private final SocketManager socketManager;
 
-    public Service(Logger logger, Path home) {
+    public Service(Logger logger, Path home, String version) {
         INSTANCE = this;
 
         this.timer = new Timer();
 
         this.logger = logger;
         this.home = home;
+        this.version = version;
 
         this.vpnConfig = ConfigUtils.loadConfig(home.resolve("config.json"));
         this.socketManager = new SocketManager(this);
     }
 
     public void onLoad() {
+        this.socketManager.connect();
         this.timer.scheduleAtFixedRate(new TimeoutTask(this), 0, 8000);
     }
 

@@ -15,7 +15,7 @@ public class ServerAntiVPN extends Plugin {
     private final Service service;
 
     public ServerAntiVPN() {
-        this.service = new Service(log, getDataFolder().toPath());
+        this.service = new Service(log, getDataFolder().toPath(), this.getDescription().getVersion());
     }
 
     @Override

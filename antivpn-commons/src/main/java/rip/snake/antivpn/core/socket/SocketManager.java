@@ -1,5 +1,6 @@
 package rip.snake.antivpn.core.socket;
 
+import org.java_websocket.framing.CloseFrame;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.data.DataRequest;
 import rip.snake.antivpn.core.data.DataResponse;
@@ -9,10 +10,9 @@ import rip.snake.antivpn.core.utils.GsonParser;
 import rip.snake.antivpn.core.utils.StringUtils;
 
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.WebSocket;
 import java.net.http.WebSocketHandshakeException;
-import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletionException;
 
 /**
@@ -20,10 +20,8 @@ import java.util.concurrent.CompletionException;
  */
 public class SocketManager {
 
-    private static final String PING = "PING";
-
     private final Service service;
-    private WebSocket socket;
+    private final SocketClient socket;
 
     /**
      * Initializing the socket.
@@ -32,16 +30,20 @@ public class SocketManager {
      */
     public SocketManager(Service service) {
         this.service = service;
-        this.socket = initialize(service);
+        this.socket = initialize(this.service);
+    }
+
+    public void connect() {
+        if (this.isConnected()) return;
+        this.socket.connect();
     }
 
     /**
      * Closing the socket.
      */
     public void close() {
-        if (this.socket == null || this.socket.isInputClosed()) return;
-
-        this.socket.sendClose(WebSocket.NORMAL_CLOSURE, "Closing");
+        if (this.isConnected()) return;
+        this.socket.close(CloseFrame.NORMAL, "Closing");
     }
 
     /**
@@ -51,28 +53,29 @@ public class SocketManager {
      * @return The response
      */
     public WatcherFunction<DataResponse> verifyAddress(String address, String username) {
-        if (this.socket == null || this.socket.isInputClosed()) return null;
+        if (!this.isConnected()) return null;
 
         // Clean the address
         address = StringUtils.cleanAddress(address);
 
         DataRequest request = new DataRequest(address, username == null ? "N/A" : username);
-        this.socket.sendText(GsonParser.toJson(request), true);
+        this.socket.send(GsonParser.toJson(request));
 
         return WatcherFunction.createFunction(request.getUid());
     }
 
     // Initialize WebSocket
-    private WebSocket initialize(Service service) {
+    private SocketClient initialize(Service service) {
         try {
-            return HttpClient
-                    .newBuilder()
-                    .build()
-                    .newWebSocketBuilder()
-                    .header("User-Agent", "AntiVPN-Plugin")
-                    .header("Authorization", "Bearer " + service.getVpnConfig().getSecret())
-                    .buildAsync(URI.create("wss://anti.snake.rip/live_checker"), new SocketClient(this))
-                    .join();
+            var connection_url = URI.create("wss://connection.antivpn.io/live_checker");
+
+            Map<String, String> httpHeaders = new HashMap<String, String>();
+
+            // User-Agent and Authorization headers
+            httpHeaders.put("User-Agent", "AntiVPN-Server/" + service.getVersion());
+            httpHeaders.put("Authorization", "Bearer " + service.getVpnConfig().getSecret());
+
+            return new SocketClient(connection_url, httpHeaders);
         } catch (CompletionException ex) {
             if (!(ex.getCause() instanceof WebSocketHandshakeException)) return null;
 
@@ -94,18 +97,18 @@ public class SocketManager {
 
 
     public boolean isConnected() {
-        boolean isOffline = this.socket == null || this.socket.isInputClosed();
-        return !isOffline;
+        if (this.socket == null) return false;
+        return this.socket.isConnected();
     }
 
     public void sendPing() {
-        if (this.socket == null || this.socket.isInputClosed()) return;
-        this.socket.sendPing(ByteBuffer.wrap(PING.getBytes()));
+        if (this.isConnected()) return;
+        this.socket.sendPing();
     }
 
     public void reconnect() {
-        if (isConnected()) return;
-        Console.error("Trying to reconnect to the socket...");
-        this.socket = initialize(this.service);
+        if (this.socket.isConnecting() || this.isConnected()) return;
+        Console.error("Trying to reconnect to the AntiVPN Server...");
+        this.socket.reconnect();
     }
 }
