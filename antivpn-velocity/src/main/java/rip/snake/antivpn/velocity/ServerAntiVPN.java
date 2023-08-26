@@ -29,21 +29,27 @@ public class ServerAntiVPN {
     private final ProxyServer server;
     private final Metrics.Factory metricsFactory;
 
+    private String version = "Unknown";
+
     @Inject
     public ServerAntiVPN(ProxyServer server, Logger logger, @DataDirectory Path pluginData, Metrics.Factory metricsFactory) {
         this.server = server;
         this.logger = logger;
         this.metricsFactory = metricsFactory;
-        PluginContainer container = server.getPluginManager().getPlugin("serverantivpn").orElseThrow(() -> new RuntimeException("Failed to get plugin container"));
 
-        this.service = new Service(logger, pluginData, container.getDescription().getVersion().orElse("unknown"));
+        this.service = new Service(logger, pluginData, version);
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        this.service.onLoad();
         this.initializeMetrics();
+        PluginContainer container = server
+                .getPluginManager()
+                .fromInstance(this)
+                .orElseThrow(() -> new IllegalArgumentException("The provided instance is not a plugin"));
+        this.version = container.getDescription().getVersion().orElse("Unknown");
 
+        this.service.onLoad();
         server.getEventManager().register(this, new VelocityPlayerListener(service));
     }
 

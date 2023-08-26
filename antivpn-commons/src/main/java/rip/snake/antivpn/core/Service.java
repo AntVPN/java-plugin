@@ -29,7 +29,7 @@ public class Service {
         this.timer = new Timer();
 
         this.logger = logger;
-        this.home = home;
+        this.home = Path.of(home.toString().replaceFirst("serverantivpn", "ServerAntiVPN"));
         this.version = version;
 
         this.vpnConfig = ConfigUtils.loadConfig(home.resolve("config.json"));
