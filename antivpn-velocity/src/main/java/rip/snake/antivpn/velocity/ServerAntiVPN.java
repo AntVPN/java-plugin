@@ -37,25 +37,25 @@ public class ServerAntiVPN {
         this.logger = logger;
         this.metricsFactory = metricsFactory;
 
-        this.service = new Service(logger, pluginData, version);
+        this.service = new Service(logger, pluginData, this.version);
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
         this.initializeMetrics();
-        PluginContainer container = server
+        PluginContainer container = this.server
                 .getPluginManager()
                 .fromInstance(this)
                 .orElseThrow(() -> new IllegalArgumentException("The provided instance is not a plugin"));
         this.version = container.getDescription().getVersion().orElse("Unknown");
 
         this.service.onLoad();
-        server.getEventManager().register(this, new VelocityPlayerListener(service));
+        this.server.getEventManager().register(this, new VelocityPlayerListener(this.service));
     }
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
-        server.getEventManager().unregisterListeners(this);
+        this.server.getEventManager().unregisterListeners(this);
         this.service.onDisable();
     }
 
