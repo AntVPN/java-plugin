@@ -47,7 +47,7 @@ public class SocketManager {
     }
 
     /**
-     * Verifying if an address is a VPNor Proxy.
+     * Verifying if an address is a VPN or Proxy.
      *
      * @param address The address to verify
      * @return The response
