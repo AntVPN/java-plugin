@@ -2,10 +2,13 @@ package rip.snake.antivpn.core.function;
 
 
 import rip.snake.antivpn.core.utils.Callback;
-import rip.snake.antivpn.core.utils.Console;
 
-import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Function that can be awaited
@@ -13,20 +16,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <T> The type of the function
  */
 public class WatcherFunction<T> {
-
     /**
      * Map of all the functions that are waiting for a response
      */
     public static final ConcurrentHashMap<String, WatcherFunction<?>> waitingResponses = new ConcurrentHashMap<>();
 
     // Lock object
-    private final Object lock = new Lock();
+    private final Lock concurrencyLock = new ReentrantLock();
+    private final Object notifyLock = new NotifyLock();
     private final String uid;
 
     // Callback function to call when the function is called
-    private Callback<T> callback;
+    private final List<Callback<T>> callbacks = new ArrayList<>();
+    private T data;
     // If the function has been called
-    private Boolean called = false;
+    private final AtomicBoolean called = new AtomicBoolean(false);
+
     // Unique identifier of the function
 
     /**
@@ -51,20 +56,31 @@ public class WatcherFunction<T> {
 
     // Called when the function is called
     public WatcherFunction<T> then(Callback<T> callback) {
-        this.callback = callback;
+        this.concurrencyLock.lock();
+        if (this.called.get()) {
+            try {
+                callback.call(this.data);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            this.callbacks.add(callback);
+        }
+        this.concurrencyLock.unlock();
         return this;
     }
 
     // Wait for the function to be called with a timeout
-    public void await(long timeoutMillis) throws InterruptedException {
-        synchronized (this.lock) {
-            if (!called) {
-                // Wait for the function to be called
-                this.lock.wait(timeoutMillis);
-
-                // Remove the function from the waiting responses if it has not been called
-                if (!called) waitingResponses.remove(this.uid);
+    public T await(long timeoutMillis) throws InterruptedException {
+        synchronized (this.notifyLock) {
+            if (this.called.get()) {
+                return this.data;
             }
+            this.notifyLock.wait(timeoutMillis);
+            if (!this.called.get()) {
+                waitingResponses.remove(this.uid);
+            }
+            return this.data;
         }
     }
 
@@ -73,34 +89,31 @@ public class WatcherFunction<T> {
      *
      * @throws InterruptedException If the thread is interrupted
      */
-    public void await() throws InterruptedException {
-        await(5000L);
+    public T await() throws InterruptedException {
+        return await(5000L);
     }
 
     // Call the function
-    public void call(T calling) throws Exception {
-        call();
-
-        // Call the callback function if it exists
-        if (callback != null) callback.call(calling);
-    }
-
-    // Call the function and notify all threads
-    private void call() {
-        // Set the function as called
-        this.called = true;
-
-        // Notify all threads to unlock them
-        synchronized (lock) {
-            lock.notifyAll();
+    public void call(T calling) {
+        if (this.called.getAndSet(true)) {
+            return;
         }
-
-        // Remove the function from the waiting responses
-        waitingResponses.remove(this.uid);
+        synchronized (this.notifyLock) {
+            this.notifyLock.notifyAll();
+        }
+        this.data = calling;
+        // Call the callback function if it exists
+        this.concurrencyLock.lock();
+        this.callbacks.forEach(tCallback -> {
+            try {
+                tCallback.call(calling);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        this.concurrencyLock.unlock();
     }
 
-    // Lock object
-    private static final class Lock {
+    public static class NotifyLock {
     }
-
 }

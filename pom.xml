@@ -13,8 +13,8 @@
     <description>Free AntiVPN.</description>
 
     <properties>
-        <BUILD_NUMBER>3</BUILD_NUMBER>
-        <ANTIVPN_VERSION>1.1.0-BETA</ANTIVPN_VERSION>
+        <BUILD_NUMBER>1</BUILD_NUMBER>
+        <ANTIVPN_VERSION>1.1.1-BETA</ANTIVPN_VERSION>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

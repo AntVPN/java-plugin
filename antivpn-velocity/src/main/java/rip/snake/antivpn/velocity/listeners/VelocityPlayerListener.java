@@ -28,15 +28,19 @@ public class VelocityPlayerListener {
             WatcherFunction<DataResponse> response = service.getSocketManager().verifyAddress(
                     address, event.getUsername()
             );
-
-            response.then(result -> {
-                if (result == null || result.isValid()) {
-                    return;
-                }
-                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                        legacy.deserialize(service.getVpnConfig().getDetectMessage())
-                ));
-            }).await();
+            if (response == null) {
+                service.getLogger().error(
+                        "Failed to verify " + event.getUsername() + " (" + address + ")! Backend is not connected"
+                );
+                return;
+            }
+            DataResponse result = response.await();
+            if (result == null || result.isValid()) {
+                return;
+            }
+            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
+                    legacy.deserialize(service.getVpnConfig().getDetectMessage())
+            ));
         } catch (Exception e) {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
             e.printStackTrace();
