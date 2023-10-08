@@ -7,7 +7,7 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import rip.snake.antivpn.bungee.ServerAntiVPN;
 import rip.snake.antivpn.core.data.DataResponse;
-import rip.snake.antivpn.core.function.WatcherFunction;
+import rip.snake.antivpn.core.function.WatchableInvoker;
 
 import java.util.Objects;
 
@@ -27,7 +27,7 @@ public class BungeePlayerListener implements Listener {
         event.registerIntent(this.plugin);
 
         try {
-            WatcherFunction<DataResponse> response = this.plugin.getService().getSocketManager().verifyAddress(address, event.getConnection().getName());
+            WatchableInvoker<DataResponse> response = this.plugin.getService().getSocketManager().verifyAddress(address, event.getConnection().getName());
 
             Objects.requireNonNull(response, "Server is offline :C").then(result -> {
                 if (result == null || result.isValid()) {

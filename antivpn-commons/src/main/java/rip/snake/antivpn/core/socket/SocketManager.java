@@ -4,7 +4,7 @@ import org.java_websocket.framing.CloseFrame;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.data.DataRequest;
 import rip.snake.antivpn.core.data.DataResponse;
-import rip.snake.antivpn.core.function.WatcherFunction;
+import rip.snake.antivpn.core.function.WatchableInvoker;
 import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
 import rip.snake.antivpn.core.utils.StringUtils;
@@ -52,7 +52,7 @@ public class SocketManager {
      * @param address The address to verify
      * @return The response
      */
-    public WatcherFunction<DataResponse> verifyAddress(String address, String username) {
+    public WatchableInvoker<DataResponse> verifyAddress(String address, String username) {
         if (!this.isConnected()) return null;
 
         // Clean the address
@@ -61,7 +61,7 @@ public class SocketManager {
         DataRequest request = new DataRequest(address, username == null ? "N/A" : username);
         this.socket.send(GsonParser.toJson(request));
 
-        return WatcherFunction.createFunction(request.getUid());
+        return WatchableInvoker.createWatchableInvoker(request.getUid());
     }
 
     // Initialize WebSocket

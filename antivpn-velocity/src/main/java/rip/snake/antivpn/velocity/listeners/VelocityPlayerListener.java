@@ -6,7 +6,7 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.data.DataResponse;
-import rip.snake.antivpn.core.function.WatcherFunction;
+import rip.snake.antivpn.core.function.WatchableInvoker;
 
 public class VelocityPlayerListener {
 
@@ -25,7 +25,7 @@ public class VelocityPlayerListener {
         String address = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
 
         try {
-            WatcherFunction<DataResponse> response = service.getSocketManager().verifyAddress(
+            WatchableInvoker<DataResponse> response = service.getSocketManager().verifyAddress(
                     address, event.getUsername()
             );
             if (response == null) {

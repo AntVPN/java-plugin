@@ -1,6 +1,5 @@
 package rip.snake.antivpn.core.function;
 
-
 import rip.snake.antivpn.core.utils.Callback;
 
 import java.util.ArrayList;
@@ -15,58 +14,46 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @param <T> The type of the function
  */
-public class WatcherFunction<T> {
-    /**
-     * Map of all the functions that are waiting for a response
-     */
-    public static final ConcurrentHashMap<String, WatcherFunction<?>> waitingResponses = new ConcurrentHashMap<>();
+public class WatchableInvoker<T> {
 
-    // Lock object
+    // Map of all the functions that are waiting for a response
+    public static final ConcurrentHashMap<String, WatchableInvoker<?>> waitingResponses = new ConcurrentHashMap<>();
+
+    // Lock objects
     private final Lock concurrencyLock = new ReentrantLock();
-    private final Object notifyLock = new NotifyLock();
+    private final Object notifyLock = new Object();
     private final String uid;
 
-    // Callback function to call when the function is called
+    // Callback functions to call when the function is called
     private final List<Callback<T>> callbacks = new ArrayList<>();
     private T data;
+
     // If the function has been called
     private final AtomicBoolean called = new AtomicBoolean(false);
-
-    // Unique identifier of the function
 
     /**
      * Create a new function
      *
      * @param uid The uid of the function
      */
-    public WatcherFunction(String uid) {
+    public WatchableInvoker(String uid) {
         this.uid = uid;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> WatcherFunction<T> getWatcherFunction(String key) {
-        return (WatcherFunction<T>) WatcherFunction.waitingResponses.getOrDefault(key, null);
+    public static <T> WatchableInvoker<T> getWatchableInvoker(String key) {
+        return (WatchableInvoker<T>) WatchableInvoker.waitingResponses.getOrDefault(key, null);
     }
 
-    public static <T> WatcherFunction<T> createFunction(String uid) {
-        WatcherFunction<T> function = new WatcherFunction<>(uid);
+    public static <T> WatchableInvoker<T> createWatchableInvoker(String uid) {
+        WatchableInvoker<T> function = new WatchableInvoker<>(uid);
         waitingResponses.put(uid, function);
         return function;
     }
 
     // Called when the function is called
-    public WatcherFunction<T> then(Callback<T> callback) {
-        this.concurrencyLock.lock();
-        if (this.called.get()) {
-            try {
-                callback.call(this.data);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            this.callbacks.add(callback);
-        }
-        this.concurrencyLock.unlock();
+    public WatchableInvoker<T> then(Callback<T> callback) {
+        this.callbacks.add(callback);
         return this;
     }
 
@@ -102,7 +89,6 @@ public class WatcherFunction<T> {
             this.notifyLock.notifyAll();
         }
         this.data = calling;
-        // Call the callback function if it exists
         this.concurrencyLock.lock();
         this.callbacks.forEach(tCallback -> {
             try {
@@ -112,8 +98,5 @@ public class WatcherFunction<T> {
             }
         });
         this.concurrencyLock.unlock();
-    }
-
-    public static class NotifyLock {
     }
 }

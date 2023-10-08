@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import rip.snake.antivpn.core.data.DataResponse;
-import rip.snake.antivpn.core.function.WatcherFunction;
+import rip.snake.antivpn.core.function.WatchableInvoker;
 import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
 
@@ -42,7 +42,7 @@ public class SocketClient extends WebSocketClient {
             // Parse the data
             var response = GsonParser.fromJson(message, DataResponse.class);
 
-            WatcherFunction<DataResponse> watcherFunction = WatcherFunction.getWatcherFunction(response.getUid());
+            WatchableInvoker<DataResponse> watcherFunction = WatchableInvoker.getWatchableInvoker(response.getUid());
             if (watcherFunction == null) return;
 
             watcherFunction.call(response);
