@@ -6,4 +6,4 @@
       description: ServerAntiVPN command
       aliases: [savpn]
       permission: antivpn.command
-      usage: /<command> [reload]
+      usage: /<command> [token]
