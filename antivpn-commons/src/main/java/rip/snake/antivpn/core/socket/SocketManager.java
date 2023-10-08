@@ -2,8 +2,8 @@ package rip.snake.antivpn.core.socket;
 
 import org.java_websocket.framing.CloseFrame;
 import rip.snake.antivpn.core.Service;
-import rip.snake.antivpn.core.data.DataRequest;
-import rip.snake.antivpn.core.data.DataResponse;
+import rip.snake.antivpn.core.data.CheckRequest;
+import rip.snake.antivpn.core.data.CheckResponse;
 import rip.snake.antivpn.core.function.WatchableInvoker;
 import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
@@ -52,13 +52,13 @@ public class SocketManager {
      * @param address The address to verify
      * @return The response
      */
-    public WatchableInvoker<DataResponse> verifyAddress(String address, String username) {
+    public WatchableInvoker<CheckResponse> verifyAddress(String address, String username) {
         if (!this.isConnected()) return null;
 
         // Clean the address
         address = StringUtils.cleanAddress(address);
 
-        DataRequest request = new DataRequest(address, username == null ? "N/A" : username);
+        CheckRequest request = new CheckRequest(address, username == null ? "N/A" : username);
         this.socket.send(GsonParser.toJson(request));
 
         return WatchableInvoker.createWatchableInvoker(request.getUid());
@@ -67,14 +67,9 @@ public class SocketManager {
     // Initialize WebSocket
     private SocketClient initialize(Service service) {
         try {
-            var connection_url = URI.create("wss://connection.antivpn.io/live_checker");
+            var connection_url = URI.create("ws://170.39.176.154:6868/live_checker");
 
-            Map<String, String> httpHeaders = new HashMap<>();
-
-            // User-Agent and Authorization headers
-            httpHeaders.put("User-Agent", "AntiVPN-Server/" + service.getVersion());
-            httpHeaders.put("Authorization", "Bearer " + service.getVpnConfig().getSecret());
-
+            Map<String, String> httpHeaders = getHeaders();
             return new SocketClient(connection_url, httpHeaders);
         } catch (CompletionException ex) {
             if (!(ex.getCause() instanceof WebSocketHandshakeException)) return null;
@@ -108,7 +103,23 @@ public class SocketManager {
 
     public void reconnect() {
         if (this.socket.isConnecting() || this.isConnected()) return;
+        this.socket.clearHeaders();
+
+        // Updating the headers, maybe the secret has been changed.
+        getHeaders().forEach(this.socket::addHeader);
+
         Console.error("Trying to reconnect to the AntiVPN Server...");
         this.socket.reconnect();
     }
+
+    public Map<String, String> getHeaders() {
+        Map<String, String> httpHeaders = new HashMap<>();
+
+        // User-Agent and Authorization headers
+        httpHeaders.put("User-Agent", "AntiVPN-Server/" + service.getVersion());
+        httpHeaders.put("Authorization", "Bearer " + service.getVpnConfig().getSecret());
+
+        return httpHeaders;
+    }
+
 }

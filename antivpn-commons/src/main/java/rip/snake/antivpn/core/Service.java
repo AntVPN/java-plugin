@@ -32,7 +32,7 @@ public class Service {
         this.home = Path.of(home.toString().replaceFirst("serverantivpn", "ServerAntiVPN"));
         this.version = version;
 
-        this.vpnConfig = ConfigUtils.loadConfig(home.resolve("config.json"));
+        this.vpnConfig = ConfigUtils.loadConfig(this.home.resolve("config.json"));
         this.socketManager = new SocketManager(this);
     }
 
@@ -45,4 +45,7 @@ public class Service {
         this.socketManager.close();
     }
 
+    public boolean saveConfig() {
+        return ConfigUtils.writeConfig(this.home.resolve("config.json"), this.vpnConfig);
+    }
 }

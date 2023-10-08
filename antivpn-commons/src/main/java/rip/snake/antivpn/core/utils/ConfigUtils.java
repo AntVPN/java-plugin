@@ -11,7 +11,7 @@ import java.nio.file.Path;
 @UtilityClass
 public class ConfigUtils {
 
-    public void writeConfig(Path config, VPNConfig vpnConfig) {
+    public boolean writeConfig(Path config, VPNConfig vpnConfig) {
         String prettyJson = GsonParser.toPrettyJson(vpnConfig);
 
         try {
@@ -21,8 +21,10 @@ public class ConfigUtils {
             }
 
             Files.writeString(config, prettyJson, StandardCharsets.UTF_8);
+            return true;
         } catch (IOException e) {
             Console.error("Failed to write config to %s, message: %s", config.toString(), e.getMessage());
+            return false;
         }
     }
 

@@ -1,9 +1,13 @@
 package rip.snake.antivpn.core.socket;
 
+import com.google.gson.JsonObject;
 import lombok.Getter;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import rip.snake.antivpn.core.data.DataResponse;
+import rip.snake.antivpn.core.Service;
+import rip.snake.antivpn.core.data.CheckResponse;
+import rip.snake.antivpn.core.data.ResponseType;
+import rip.snake.antivpn.core.data.SettingsResponse;
 import rip.snake.antivpn.core.function.WatchableInvoker;
 import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
@@ -18,10 +22,12 @@ import java.util.Map;
 public class SocketClient extends WebSocketClient {
 
     private boolean connecting = true;
+    private Service service;
 
-    public SocketClient(URI serverUri, Map<String, String> httpHeaders) {
+    public SocketClient(Service service, URI serverUri, Map<String, String> httpHeaders) {
         super(serverUri, httpHeaders);
         this.setTcpNoDelay(true);
+        this.service = service;
     }
 
     @Override
@@ -39,13 +45,33 @@ public class SocketClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         try {
-            // Parse the data
-            var response = GsonParser.fromJson(message, DataResponse.class);
+            JsonObject object = GsonParser.parse(message);
 
-            WatchableInvoker<DataResponse> watcherFunction = WatchableInvoker.getWatchableInvoker(response.getUid());
-            if (watcherFunction == null) return;
+            if (!object.has("type")) {
+                Console.error("Received invalid message from the AntiVPN Server. (Message: %s)", message);
+                return;
+            }
 
-            watcherFunction.call(response);
+            if (object.get("type").getAsString().equalsIgnoreCase(ResponseType.SETTINGS.name())) {
+                JsonObject settingsObject = object.get("data").getAsJsonObject();
+                SettingsResponse response = GsonParser.fromJson(settingsObject, SettingsResponse.class);
+
+                // Update the settings
+                this.service.getVpnConfig().setDetectMessage(response.getKickMessage());
+                this.service.saveConfig();
+
+                Console.fine("Received settings from the AntiVPN Server.");
+            } else if (object.get("type").getAsString().equalsIgnoreCase(ResponseType.CHECK.name())) {
+                // Parse the data
+                var response = GsonParser.fromJson(message, CheckResponse.class);
+
+                WatchableInvoker<CheckResponse> watcherFunction = WatchableInvoker.getWatchableInvoker(response.getUid());
+                if (watcherFunction == null) return;
+
+                watcherFunction.call(response);
+            } else {
+                Console.error("Received invalid message from the AntiVPN Server. (Message: %s)", message);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

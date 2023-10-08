@@ -7,9 +7,10 @@ import lombok.Data;
 @AllArgsConstructor
 public class VPNConfig {
 
-    private final String secret;
-    private final String detectMessage;
     private final boolean debug;
+
+    private String secret;
+    private String detectMessage;
 
     public VPNConfig() {
         this(
@@ -19,4 +20,9 @@ public class VPNConfig {
         );
     }
 
+    public VPNConfig(String secret, String detectMessage, boolean debug) {
+        this.secret = secret;
+        this.detectMessage = detectMessage;
+        this.debug = debug;
+    }
 }

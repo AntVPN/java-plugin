@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 import rip.snake.antivpn.core.Service;
+import rip.snake.antivpn.velocity.commands.AntiVPNCommand;
 import rip.snake.antivpn.velocity.listeners.VelocityPlayerListener;
 import rip.snake.antivpn.velocity.metrics.Metrics;
 
@@ -51,6 +52,7 @@ public class ServerAntiVPN {
 
         this.service.onLoad();
         this.server.getEventManager().register(this, new VelocityPlayerListener(this.service));
+       this.server.getCommandManager().register(AntiVPNCommand.createAntiVPNCommand(this.service));
     }
 
     @Subscribe

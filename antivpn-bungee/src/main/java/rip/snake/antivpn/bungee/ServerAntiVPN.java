@@ -3,6 +3,7 @@ package rip.snake.antivpn.bungee;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.md_5.bungee.api.plugin.Plugin;
+import rip.snake.antivpn.bungee.commands.AntiVPNCommand;
 import rip.snake.antivpn.bungee.listeners.BungeePlayerListener;
 import rip.snake.antivpn.bungee.metrics.Metrics;
 import rip.snake.antivpn.core.Service;
@@ -24,6 +25,7 @@ public class ServerAntiVPN extends Plugin {
         this.initializeMetrics();
 
         this.getProxy().getPluginManager().registerListener(this, new BungeePlayerListener(this));
+        this.getProxy().getPluginManager().registerCommand(this, new AntiVPNCommand(this.service));
     }
 
     @Override
