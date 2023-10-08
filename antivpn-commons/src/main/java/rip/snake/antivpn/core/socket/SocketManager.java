@@ -70,7 +70,7 @@ public class SocketManager {
             var connection_url = URI.create("ws://170.39.176.154:6868/live_checker");
 
             Map<String, String> httpHeaders = getHeaders();
-            return new SocketClient(connection_url, httpHeaders);
+            return new SocketClient(this.service, connection_url, httpHeaders);
         } catch (CompletionException ex) {
             if (!(ex.getCause() instanceof WebSocketHandshakeException)) return null;
 
