@@ -13,6 +13,7 @@ import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.velocity.commands.AntiVPNCommand;
 import rip.snake.antivpn.velocity.listeners.VelocityPlayerListener;
 import rip.snake.antivpn.velocity.metrics.Metrics;
+import rip.snake.antivpn.velocity.utils.SharkLoggerImpl;
 
 import java.nio.file.Path;
 
@@ -38,7 +39,7 @@ public class ServerAntiVPN {
         this.logger = logger;
         this.metricsFactory = metricsFactory;
 
-        this.service = new Service(logger, pluginData, this.version);
+        this.service = new Service(new SharkLoggerImpl(logger), pluginData, this.version);
     }
 
     @Subscribe

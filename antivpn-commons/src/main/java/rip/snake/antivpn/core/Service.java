@@ -1,11 +1,11 @@
 package rip.snake.antivpn.core;
 
 import lombok.Data;
-import org.slf4j.Logger;
 import rip.snake.antivpn.core.config.VPNConfig;
 import rip.snake.antivpn.core.socket.SocketManager;
 import rip.snake.antivpn.core.tasks.TimeoutTask;
 import rip.snake.antivpn.core.utils.ConfigUtils;
+import rip.snake.antivpn.core.utils.SharkLogger;
 
 import java.nio.file.Path;
 import java.util.Timer;
@@ -16,14 +16,14 @@ public class Service {
     public static Service INSTANCE;
 
     private final Path home;
-    private final Logger logger;
+    private final SharkLogger logger;
     private final String version;
 
     private final Timer timer;
     private final VPNConfig vpnConfig;
     private final SocketManager socketManager;
 
-    public Service(Logger logger, Path home, String version) {
+    public Service(SharkLogger logger, Path home, String version) {
         INSTANCE = this;
 
         this.timer = new Timer();
