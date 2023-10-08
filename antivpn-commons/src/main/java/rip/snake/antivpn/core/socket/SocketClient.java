@@ -44,6 +44,7 @@ public class SocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
+        Console.debug("Received message from the AntiVPN Server. (Message: %s)", message);
         try {
             JsonObject object = GsonParser.parse(message);
 
@@ -53,7 +54,7 @@ public class SocketClient extends WebSocketClient {
             }
 
             if (object.get("type").getAsString().equalsIgnoreCase(ResponseType.SETTINGS.name())) {
-                JsonObject settingsObject = object.get("data").getAsJsonObject();
+                JsonObject settingsObject = object.get("settings").getAsJsonObject();
                 SettingsResponse response = GsonParser.fromJson(settingsObject, SettingsResponse.class);
 
                 // Update the settings
@@ -61,7 +62,7 @@ public class SocketClient extends WebSocketClient {
                 this.service.saveConfig();
 
                 Console.fine("Received settings from the AntiVPN Server.");
-            } else if (object.get("type").getAsString().equalsIgnoreCase(ResponseType.CHECK.name())) {
+            } else if (object.get("type").getAsString().equalsIgnoreCase(ResponseType.VERIFY.name())) {
                 // Parse the data
                 var response = GsonParser.fromJson(message, CheckResponse.class);
 
