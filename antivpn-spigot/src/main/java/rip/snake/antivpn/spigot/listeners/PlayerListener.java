@@ -1,10 +1,12 @@
 package rip.snake.antivpn.spigot.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPreLoginEvent;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.data.CheckResponse;
@@ -47,6 +49,17 @@ public class PlayerListener implements Listener {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void playerJoin(PlayerJoinEvent event) {
+        boolean isOnlineMode = Bukkit.getOnlineMode();
+        String playerName = event.getPlayer().getName();
+        String userId = event.getPlayer().getUniqueId().toString();
+        String address = event.getPlayer().getAddress().getAddress().getHostAddress();
+
+        // Send the data to the backend server
+        service.getSocketManager().sendUserData(playerName, userId, address, isOnlineMode);
     }
 
 }

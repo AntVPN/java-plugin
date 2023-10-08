@@ -4,6 +4,7 @@ import org.java_websocket.framing.CloseFrame;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.data.CheckRequest;
 import rip.snake.antivpn.core.data.CheckResponse;
+import rip.snake.antivpn.core.data.UserDataRequest;
 import rip.snake.antivpn.core.function.WatchableInvoker;
 import rip.snake.antivpn.core.utils.Console;
 import rip.snake.antivpn.core.utils.GsonParser;
@@ -62,6 +63,11 @@ public class SocketManager {
         this.socket.send(GsonParser.toJson(request));
 
         return WatchableInvoker.createWatchableInvoker(request.getUid());
+    }
+
+    public void sendUserData(String username, String uuid, String ip, boolean premium) {
+        if (!this.isConnected()) return;
+        this.socket.send(GsonParser.toJson(new UserDataRequest(username, uuid, ip, premium)));
     }
 
     // Initialize WebSocket

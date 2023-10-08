@@ -1,6 +1,8 @@
 package rip.snake.antivpn.bungee.listeners;
 
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -43,6 +45,19 @@ public class BungeePlayerListener implements Listener {
             this.plugin.getLogger().severe("Failed to verify address " + address + "! " + e.getMessage());
             event.completeIntent(this.plugin);
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPostLogin(PostLoginEvent event) {
+        if (event.getPlayer() == null) return;
+        ProxiedPlayer player = event.getPlayer();
+        String username = player.getName();
+        String userId = player.getUniqueId().toString();
+        String address = player.getAddress().getAddress().toString();
+        boolean isPremium = player.getPendingConnection().isOnlineMode();
+
+        // Send the data to the backend
+        this.plugin.getService().getSocketManager().sendUserData(username, userId, address, isPremium);
     }
 
 }

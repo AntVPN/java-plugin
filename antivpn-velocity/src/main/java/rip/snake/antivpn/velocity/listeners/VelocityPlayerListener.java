@@ -2,6 +2,7 @@ package rip.snake.antivpn.velocity.listeners;
 
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import rip.snake.antivpn.core.Service;
@@ -45,5 +46,17 @@ public class VelocityPlayerListener {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @Subscribe(order = PostOrder.FIRST)
+    public void onPostLogin(PostLoginEvent event) {
+        if (event.getPlayer() == null) return;
+        String username = event.getPlayer().getUsername();
+        String userId = event.getPlayer().getUniqueId().toString();
+        String address = event.getPlayer().getRemoteAddress().getAddress().getHostAddress();
+        boolean isPremium = event.getPlayer().isOnlineMode();
+
+        // Send the data to the backend
+        this.service.getSocketManager().sendUserData(username, userId, address, isPremium);
     }
 }

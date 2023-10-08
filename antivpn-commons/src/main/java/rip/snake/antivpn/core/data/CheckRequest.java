@@ -1,16 +1,17 @@
 package rip.snake.antivpn.core.data;
 
-import lombok.Data;
+import lombok.Getter;
 import rip.snake.antivpn.core.utils.IDGenerator;
 
-@Data
-public class CheckRequest {
+@Getter
+public class CheckRequest extends Request {
 
-    private String uid;
-    private String address;
-    private String username;
+    private final String uid;
+    private final String address;
+    private final String username;
 
     public CheckRequest(String address, String username) {
+        super(RequestType.VERIFY);
         this.uid = IDGenerator.generateUniqueID();
         this.address = address;
         this.username = username;
