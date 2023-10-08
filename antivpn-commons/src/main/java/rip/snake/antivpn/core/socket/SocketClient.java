@@ -74,6 +74,7 @@ public class SocketClient extends WebSocketClient {
             }
         } catch (Exception e) {
             Console.error("An error occurred while parsing the message from the AntiVPN Server. (Message: %s)", message);
+            Console.error("Error: %s", e.getMessage());
         }
     }
 
