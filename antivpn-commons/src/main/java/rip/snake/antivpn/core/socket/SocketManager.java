@@ -73,7 +73,7 @@ public class SocketManager {
     // Initialize WebSocket
     private SocketClient initialize(Service service) {
         try {
-            var connection_url = URI.create("ws://170.39.176.154:6868/live_checker");
+            var connection_url = URI.create("wss://connection.antivpn.io/live_checker");
 
             Map<String, String> httpHeaders = getHeaders();
             return new SocketClient(this.service, connection_url, httpHeaders);
