@@ -6,6 +6,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import rip.snake.antivpn.bungee.commands.AntiVPNCommand;
 import rip.snake.antivpn.bungee.listeners.BungeePlayerListener;
 import rip.snake.antivpn.bungee.metrics.Metrics;
+import rip.snake.antivpn.bungee.utils.SharkLoggerImpl;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.config.VPNConfig;
 
@@ -16,7 +17,7 @@ public class ServerAntiVPN extends Plugin {
     private final Service service;
 
     public ServerAntiVPN() {
-        this.service = new Service(log, getDataFolder().toPath(), this.getDescription().getVersion());
+        this.service = new Service(new SharkLoggerImpl(), getDataFolder().toPath(), this.getDescription().getVersion());
     }
 
     @Override
