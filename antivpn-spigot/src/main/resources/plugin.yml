@@ -1,0 +1,9 @@
+  name: ServerAntiVPN
+  main: rip.snake.antivpn.spigot.ServerAntiVPN
+  version: ${project.version}
+  commands:
+    antivpn:
+      description: ServerAntiVPN command
+      aliases: [savpn]
+      permission: antivpn.command
+      usage: /<command> [reload]
