@@ -16,14 +16,7 @@ public final class AntiVPNCommand {
     public static BrigadierCommand createAntiVPNCommand(Service service) {
         LiteralCommandNode<CommandSource> antivpnNode = LiteralArgumentBuilder
                 .<CommandSource>literal("antivpn")
-                .requires(source -> {
-                    // Check if the source is a console
-                    if (!(source instanceof ConsoleCommandSource)) {
-                        source.sendMessage(Component.text("This command can only be executed from the console!", NamedTextColor.RED));
-                        return false;
-                    }
-                    return true;
-                })
+                .requires(source -> (source instanceof ConsoleCommandSource))
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("tokenId", StringArgumentType.word())
                         .executes(context -> {
                             String tokenId = context.getArgument("tokenId", String.class);
@@ -45,6 +38,8 @@ public final class AntiVPNCommand {
     // Assuming this method exists to handle the tokenId
     private static boolean processTokenId(String tokenId, Service service) {
         service.getVpnConfig().setSecret(tokenId);
+        service.getSocketManager().reconnect();
+
         return service.saveConfig();
     }
 }
