@@ -65,12 +65,13 @@ public class VelocityPlayerListener {
         String username = player.getUsername();
         String userId = player.getUniqueId().toString();
         String address = player.getRemoteAddress().getAddress().getHostAddress();
+        String version = String.valueOf(player.getProtocolVersion().getProtocol());
         boolean isPremium = player.isOnlineMode();
 
         String server = player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName() : null;
 
         // Send the data to the backend
-        this.service.getSocketManager().sendUserData(username, userId, address, server, connected, isPremium);
+        this.service.getSocketManager().sendUserData(username, userId, version, address, server, connected, isPremium);
     }
 
 }

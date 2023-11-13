@@ -63,12 +63,13 @@ public class BungeePlayerListener implements Listener {
         String username = player.getName();
         String userId = player.getUniqueId().toString();
         String address = player.getSocketAddress().toString();
+        String version = String.valueOf(player.getPendingConnection().getVersion());
         boolean isPremium = player.getPendingConnection().isOnlineMode();
 
         String serverName = player.getServer() != null ? player.getServer().getInfo().getName() : null;
 
         // Send the data to the backend
-        this.plugin.getService().getSocketManager().sendUserData(username, userId, address, serverName, connected, isPremium);
+        this.plugin.getService().getSocketManager().sendUserData(username, userId, version, address, serverName, connected, isPremium);
     }
 
 }

@@ -13,13 +13,17 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.data.CheckResponse;
 import rip.snake.antivpn.core.function.WatchableInvoker;
+import rip.snake.antivpn.spigot.ServerAntiVPN;
+import rip.snake.antivpn.spigot.version.VersionHelper;
 
 public class PlayerListener implements Listener {
 
     private final Service service;
+    private final VersionHelper versionHelper;
 
-    public PlayerListener(Service service) {
-        this.service = service;
+    public PlayerListener(ServerAntiVPN plugin) {
+        this.service = plugin.getService();
+        this.versionHelper = plugin.getVersionHelper();
     }
 
     @SuppressWarnings("deprecation")
@@ -69,8 +73,11 @@ public class PlayerListener implements Listener {
         String userId = player.getUniqueId().toString();
         String address = player.getAddress().getAddress().getHostAddress();
 
+        // get protocol version
+        String version = String.valueOf(versionHelper.getProtocolVersion(player));
+
         // Send the data to the backend server
-        service.getSocketManager().sendUserData(playerName, userId, address, null, connected, isOnlineMode);
+        service.getSocketManager().sendUserData(playerName, userId, version, address, null, connected, isOnlineMode);
     }
 
 }
