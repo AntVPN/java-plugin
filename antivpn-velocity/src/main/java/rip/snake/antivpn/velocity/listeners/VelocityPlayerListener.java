@@ -70,7 +70,7 @@ public class VelocityPlayerListener {
         String server = player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName() : null;
 
         // Send the data to the backend
-        this.service.getSocketManager().sendUserData(username, userId, address, server, true, isPremium);
+        this.service.getSocketManager().sendUserData(username, userId, address, server, connected, isPremium);
     }
 
 }
