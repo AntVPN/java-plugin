@@ -4,6 +4,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -48,16 +49,26 @@ public class BungeePlayerListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPostLogin(PostLoginEvent event) {
-        if (event.getPlayer() == null) return;
-        ProxiedPlayer player = event.getPlayer();
+    public void onServerConnected(ServerConnectedEvent event) {
+        this.handlePlayer(event.getPlayer(), true);
+    }
+
+    @EventHandler
+    public void onPlayerDisconnect(PostLoginEvent event) {
+        this.handlePlayer(event.getPlayer(), false);
+    }
+
+    private void handlePlayer(ProxiedPlayer player, boolean connected) {
+        if (player == null) return;
         String username = player.getName();
         String userId = player.getUniqueId().toString();
-        String address = player.getAddress().getAddress().toString();
+        String address = player.getSocketAddress().toString();
         boolean isPremium = player.getPendingConnection().isOnlineMode();
 
+        String serverName = player.getServer() != null ? player.getServer().getInfo().getName() : null;
+
         // Send the data to the backend
-        this.plugin.getService().getSocketManager().sendUserData(username, userId, address, isPremium);
+        this.plugin.getService().getSocketManager().sendUserData(username, userId, address, serverName, connected, isPremium);
     }
 
 }

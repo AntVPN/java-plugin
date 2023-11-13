@@ -2,8 +2,10 @@ package rip.snake.antivpn.velocity.listeners;
 
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.core.data.CheckResponse;
@@ -49,14 +51,26 @@ public class VelocityPlayerListener {
     }
 
     @Subscribe(order = PostOrder.FIRST)
-    public void onPostLogin(PostLoginEvent event) {
-        if (event.getPlayer() == null) return;
-        String username = event.getPlayer().getUsername();
-        String userId = event.getPlayer().getUniqueId().toString();
-        String address = event.getPlayer().getRemoteAddress().getAddress().getHostAddress();
-        boolean isPremium = event.getPlayer().isOnlineMode();
+    public void onServerConnect(ServerConnectedEvent event) {
+        this.handlePlayer(event.getPlayer(), true);
+    }
+
+    @Subscribe(order = PostOrder.FIRST)
+    public void onPlayerDisconnect(DisconnectEvent event) {
+        this.handlePlayer(event.getPlayer(), false);
+    }
+
+    private void handlePlayer(Player player, boolean connected) {
+        if (player == null) return;
+        String username = player.getUsername();
+        String userId = player.getUniqueId().toString();
+        String address = player.getRemoteAddress().getAddress().getHostAddress();
+        boolean isPremium = player.isOnlineMode();
+
+        String server = player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName() : null;
 
         // Send the data to the backend
-        this.service.getSocketManager().sendUserData(username, userId, address, isPremium);
+        this.service.getSocketManager().sendUserData(username, userId, address, server, true, isPremium);
     }
+
 }

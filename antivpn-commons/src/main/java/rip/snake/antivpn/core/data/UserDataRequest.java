@@ -8,13 +8,17 @@ public class UserDataRequest extends Request {
     private final String username;
     private final String uniqueId;
     private final String address;
+    private final String server;
+    private final boolean connected;
     private final boolean premium;
 
-    public UserDataRequest(String username, String uniqueId, String address, boolean premium) {
+    public UserDataRequest(String username, String uniqueId, String address, String server, boolean connected, boolean premium) {
         super(RequestType.USER_DATA);
         this.username = username;
         this.uniqueId = uniqueId;
         this.address = address;
+        this.server = server;
+        this.connected = connected;
         this.premium = premium;
     }
 
