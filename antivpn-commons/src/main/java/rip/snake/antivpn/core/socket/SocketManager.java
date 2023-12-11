@@ -65,9 +65,9 @@ public class SocketManager {
         return WatchableInvoker.createWatchableInvoker(request.getUid());
     }
 
-    public void sendUserData(String username, String uuid, String version, String ip, String server, boolean connected, boolean premium) {
+    public void sendUserData(String username, String uuid, String version, String address, String server, boolean connected, boolean premium) {
         if (!this.isConnected()) return;
-        this.socket.send(GsonParser.toJson(new UserDataRequest(username, uuid, ip, server,version, connected, premium)));
+        this.socket.send(GsonParser.toJson(new UserDataRequest(username, uuid, version, address, server, connected, premium)));
     }
 
     // Initialize WebSocket
