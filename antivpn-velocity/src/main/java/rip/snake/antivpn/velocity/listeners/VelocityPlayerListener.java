@@ -50,12 +50,12 @@ public class VelocityPlayerListener {
         }
     }
 
-    @Subscribe(order = PostOrder.FIRST)
+    @Subscribe(order = PostOrder.LAST)
     public void onServerConnect(ServerConnectedEvent event) {
         this.handlePlayer(event.getPlayer(), true);
     }
 
-    @Subscribe(order = PostOrder.FIRST)
+    @Subscribe(order = PostOrder.LAST)
     public void onPlayerDisconnect(DisconnectEvent event) {
         this.handlePlayer(event.getPlayer(), false);
     }
