@@ -9,7 +9,9 @@ import rip.snake.antivpn.core.Service;
 public final class AntiVPNCommand implements CommandExecutor {
     private final Service service;
 
-    public AntiVPNCommand(Service service) { this.service = service; }
+    public AntiVPNCommand(Service service) {
+        this.service = service;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -17,7 +19,7 @@ public final class AntiVPNCommand implements CommandExecutor {
             sender.sendMessage("This command can only be run from the console.");
             return false;
         }
-        
+
         if (args.length == 0) {
             sender.sendMessage("Please provide a tokenId.");
             return false;
