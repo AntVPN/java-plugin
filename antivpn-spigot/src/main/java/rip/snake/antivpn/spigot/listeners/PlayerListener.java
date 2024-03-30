@@ -19,11 +19,11 @@ import rip.snake.antivpn.spigot.version.VersionHelper;
 public class PlayerListener implements Listener {
 
     private final Service service;
-    private final VersionHelper versionHelper;
+    private final ServerAntiVPN plugin;
 
     public PlayerListener(ServerAntiVPN plugin) {
+        this.plugin = plugin;
         this.service = plugin.getService();
-        this.versionHelper = plugin.getVersionHelper();
     }
 
     @SuppressWarnings("deprecation")
@@ -74,7 +74,7 @@ public class PlayerListener implements Listener {
         String address = player.getAddress().getAddress().getHostAddress();
 
         // get protocol version
-        String version = String.valueOf(versionHelper.getProtocolVersion(player));
+        String version = String.valueOf(plugin.getVersionHelper().getProtocolVersion(player));
 
         // Send the data to the backend server
         service.getSocketManager().sendUserData(playerName, userId, version, address, null, connected, isOnlineMode);
