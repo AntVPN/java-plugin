@@ -108,15 +108,15 @@ public class SocketManager {
     }
 
     public void reconnect() {
+        // Close the socket
+        Console.log("Closing the AntiVPN Server connection...");
+        this.socket.close();
+
         if (this.socket.isConnecting() || this.isConnected()) return;
         this.socket.clearHeaders();
 
         // Updating the headers, maybe the secret has been changed.
         getHeaders().forEach(this.socket::addHeader);
-
-        // Close the socket
-        Console.log("Closing the AntiVPN Server connection...");
-        this.socket.close();
 
         // Reconnect
         Console.error("Reconnecting to the AntiVPN Server...");
