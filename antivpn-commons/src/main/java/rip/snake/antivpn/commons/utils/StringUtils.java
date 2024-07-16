@@ -1,4 +1,4 @@
-package rip.snake.antivpn.core.utils;
+package rip.snake.antivpn.commons.utils;
 
 import lombok.experimental.UtilityClass;
 

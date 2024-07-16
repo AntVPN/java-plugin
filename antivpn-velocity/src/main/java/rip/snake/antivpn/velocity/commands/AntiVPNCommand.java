@@ -9,7 +9,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import rip.snake.antivpn.core.Service;
+import rip.snake.antivpn.commons.Service;
 
 public final class AntiVPNCommand {
 
@@ -38,7 +38,9 @@ public final class AntiVPNCommand {
     // Assuming this method exists to handle the tokenId
     private static boolean processTokenId(String tokenId, Service service) {
         service.getVpnConfig().setSecret(tokenId);
-        service.getSocketManager().reconnect();
+
+        service.getAntiVPN().getAntiVPNConfig().withApiKey(tokenId);
+        service.getAntiVPN().getSocketManager().reconnect();
 
         return service.saveConfig();
     }

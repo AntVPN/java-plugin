@@ -1,5 +1,6 @@
-package rip.snake.antivpn.core.config;
+package rip.snake.antivpn.commons.config;
 
+import io.antivpn.api.config.AntiVPNConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,18 +12,19 @@ public class VPNConfig {
 
     private String secret;
     private String detectMessage;
+    private int cacheTimeout;
 
     public VPNConfig() {
         this(
+                false,
                 "secret",
                 "§cVPN Detected!\n§cPlease disable your VPN and rejoin.\n§cIf you believe this is a mistake, please contact an administrator.",
-                false
+                120
         );
     }
 
-    public VPNConfig(String secret, String detectMessage, boolean debug) {
-        this.secret = secret;
-        this.detectMessage = detectMessage;
-        this.debug = debug;
+    public void write(AntiVPNConfig antiVPNConfig) {
+        antiVPNConfig.setDebug(this.debug);
+        antiVPNConfig.withApiKey(this.secret);
     }
 }

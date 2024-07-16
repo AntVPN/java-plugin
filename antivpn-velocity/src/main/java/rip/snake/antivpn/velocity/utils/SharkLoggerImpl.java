@@ -1,9 +1,9 @@
 package rip.snake.antivpn.velocity.utils;
 
+import io.antivpn.api.logger.VPNLogger;
 import org.slf4j.Logger;
-import rip.snake.antivpn.core.utils.SharkLogger;
 
-public class SharkLoggerImpl implements SharkLogger {
+public class SharkLoggerImpl implements VPNLogger {
 
     private final Logger logger;
 

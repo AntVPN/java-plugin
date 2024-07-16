@@ -1,5 +1,7 @@
 package rip.snake.antivpn.bungee.listeners;
 
+import io.antivpn.api.data.socket.request.impl.CheckRequest;
+import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
@@ -9,10 +11,10 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import rip.snake.antivpn.bungee.ServerAntiVPN;
-import rip.snake.antivpn.core.data.CheckResponse;
-import rip.snake.antivpn.core.function.WatchableInvoker;
+import rip.snake.antivpn.commons.utils.StringUtils;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class BungeePlayerListener implements Listener {
 
@@ -30,9 +32,12 @@ public class BungeePlayerListener implements Listener {
         event.registerIntent(this.plugin);
 
         try {
-            WatchableInvoker<CheckResponse> response = this.plugin.getService().getSocketManager().verifyAddress(address, event.getConnection().getName());
+            CompletableFuture<CheckResponse> response = this.plugin.getService().getAntiVPN()
+                    .getSocketManager().getSocketDataHandler()
+                    .verify(new CheckRequest(StringUtils.cleanAddress(address), event.getConnection().getName()));
 
-            Objects.requireNonNull(response, "Server is offline :C").then(result -> {
+
+            Objects.requireNonNull(response, "Server is offline :C").thenAccept(result -> {
                 if (result == null || result.isValid()) {
                     event.completeIntent(this.plugin);
                     return;
@@ -41,6 +46,10 @@ public class BungeePlayerListener implements Listener {
                 event.setCancelReason(TextComponent.fromLegacyText(this.plugin.getConfig().getDetectMessage()));
                 event.setCancelled(true);
                 event.completeIntent(this.plugin);
+            }).exceptionally(e -> {
+                this.plugin.getLogger().severe("Failed to verify address " + address + "! " + e.getMessage());
+                event.completeIntent(this.plugin);
+                return null;
             });
         } catch (Exception e) {
             this.plugin.getLogger().severe("Failed to verify address " + address + "! " + e.getMessage());
@@ -69,7 +78,8 @@ public class BungeePlayerListener implements Listener {
         String serverName = player.getServer() != null ? player.getServer().getInfo().getName() : null;
 
         // Send the data to the backend
-        this.plugin.getService().getSocketManager().sendUserData(username, userId, version, address, serverName, connected, isPremium);
+        this.plugin.getService().getAntiVPN().getSocketManager().getSocketDataHandler()
+                .sendUserData(username, userId, version, address, serverName, connected, isPremium);
     }
 
 }

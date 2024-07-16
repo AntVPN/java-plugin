@@ -7,8 +7,8 @@ import rip.snake.antivpn.bungee.commands.AntiVPNCommand;
 import rip.snake.antivpn.bungee.listeners.BungeePlayerListener;
 import rip.snake.antivpn.bungee.metrics.Metrics;
 import rip.snake.antivpn.bungee.utils.SharkLoggerImpl;
-import rip.snake.antivpn.core.Service;
-import rip.snake.antivpn.core.config.VPNConfig;
+import rip.snake.antivpn.commons.Service;
+import rip.snake.antivpn.commons.config.VPNConfig;
 
 @Slf4j
 @Getter

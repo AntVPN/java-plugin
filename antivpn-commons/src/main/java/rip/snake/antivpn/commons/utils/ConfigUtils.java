@@ -1,7 +1,10 @@
-package rip.snake.antivpn.core.utils;
+package rip.snake.antivpn.commons.utils;
 
+import io.antivpn.api.utils.GsonParser;
 import lombok.experimental.UtilityClass;
-import rip.snake.antivpn.core.config.VPNConfig;
+import rip.snake.antivpn.commons.config.VPNConfig;
+
+import io.antivpn.api.logger.Console;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -10,8 +13,7 @@ import java.nio.file.Path;
 
 @UtilityClass
 public class ConfigUtils {
-
-    public boolean writeConfig(Path config, VPNConfig vpnConfig) {
+    public boolean writeConfig(Path config, Console console, VPNConfig vpnConfig) {
         String prettyJson = GsonParser.toPrettyJson(vpnConfig);
 
         try {
@@ -23,23 +25,22 @@ public class ConfigUtils {
             Files.writeString(config, prettyJson, StandardCharsets.UTF_8);
             return true;
         } catch (IOException e) {
-            Console.error("Failed to write config to %s, message: %s", config.toString(), e.getMessage());
+            console.error("Failed to write config to %s, message: %s", config.toString(), e.getMessage());
             return false;
         }
     }
 
-    public VPNConfig loadConfig(Path config) {
+    public VPNConfig loadConfig(Path config, Console console) {
         try {
             String content = Files.readString(config, StandardCharsets.UTF_8);
             return GsonParser.fromJson(content, VPNConfig.class);
         } catch (IOException e) {
-            Console.error("Failed to read config from %s, writing one instead.", config.toString());
+            console.error("Failed to read config from %s, writing one instead.", config.toString());
 
             VPNConfig vpnConfig = new VPNConfig();
-            writeConfig(config, vpnConfig);
+            writeConfig(config, console, vpnConfig);
 
             return vpnConfig;
         }
     }
-
 }

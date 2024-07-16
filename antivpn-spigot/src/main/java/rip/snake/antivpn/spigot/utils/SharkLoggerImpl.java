@@ -1,9 +1,9 @@
 package rip.snake.antivpn.spigot.utils;
 
+import io.antivpn.api.logger.VPNLogger;
 import org.bukkit.Bukkit;
-import rip.snake.antivpn.core.utils.SharkLogger;
 
-public class SharkLoggerImpl implements SharkLogger {
+public class SharkLoggerImpl implements VPNLogger {
 
     @Override
     public void log(String message, Object... args) {

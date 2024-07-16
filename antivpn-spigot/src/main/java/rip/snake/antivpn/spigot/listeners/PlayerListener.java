@@ -1,5 +1,7 @@
 package rip.snake.antivpn.spigot.listeners;
 
+import io.antivpn.api.data.socket.request.impl.CheckRequest;
+import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -10,11 +12,11 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import rip.snake.antivpn.core.Service;
-import rip.snake.antivpn.core.data.CheckResponse;
-import rip.snake.antivpn.core.function.WatchableInvoker;
+import rip.snake.antivpn.commons.Service;
+import rip.snake.antivpn.commons.utils.StringUtils;
 import rip.snake.antivpn.spigot.ServerAntiVPN;
-import rip.snake.antivpn.spigot.version.VersionHelper;
+
+import java.util.concurrent.CompletableFuture;
 
 public class PlayerListener implements Listener {
 
@@ -35,16 +37,15 @@ public class PlayerListener implements Listener {
         String address = event.getAddress().getHostAddress();
 
         try {
-            WatchableInvoker<CheckResponse> response = service.getSocketManager().verifyAddress(
-                    address, event.getName()
-            );
+            CompletableFuture<CheckResponse> response = service.getAntiVPN().getSocketManager().getSocketDataHandler()
+                    .verify(new CheckRequest(StringUtils.cleanAddress(address), event.getName()));
             if (response == null) {
                 service.getLogger().error(
                         "Failed to verify " + event.getName() + " (" + address + ")! Backend is not connected"
                 );
                 return;
             }
-            CheckResponse result = response.await();
+            CheckResponse result = response.get();
             if (result == null || result.isValid()) {
                 return;
             }
@@ -77,7 +78,8 @@ public class PlayerListener implements Listener {
         String version = String.valueOf(plugin.getVersionHelper().getProtocolVersion(player));
 
         // Send the data to the backend server
-        service.getSocketManager().sendUserData(playerName, userId, version, address, null, connected, isOnlineMode);
+        service.getAntiVPN().getSocketManager().getSocketDataHandler()
+                .sendUserData(playerName, userId, version, address, null, connected, isOnlineMode);
     }
 
 }

@@ -6,10 +6,13 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
+import io.antivpn.api.data.socket.request.impl.CheckRequest;
+import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import rip.snake.antivpn.core.Service;
-import rip.snake.antivpn.core.data.CheckResponse;
-import rip.snake.antivpn.core.function.WatchableInvoker;
+import rip.snake.antivpn.commons.Service;
+import rip.snake.antivpn.commons.utils.StringUtils;
+
+import java.util.concurrent.CompletableFuture;
 
 public class VelocityPlayerListener {
 
@@ -28,16 +31,15 @@ public class VelocityPlayerListener {
         String address = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
 
         try {
-            WatchableInvoker<CheckResponse> response = service.getSocketManager().verifyAddress(
-                    address, event.getUsername()
-            );
+            CompletableFuture<CheckResponse> response = service.getAntiVPN().getSocketManager().getSocketDataHandler()
+                    .verify(new CheckRequest(StringUtils.cleanAddress(address), event.getUsername()));
             if (response == null) {
                 service.getLogger().error(
                         "Failed to verify " + event.getUsername() + " (" + address + ")! Backend is not connected"
                 );
                 return;
             }
-            CheckResponse result = response.await();
+            CheckResponse result = response.get();
             if (result == null || result.isValid()) {
                 return;
             }
@@ -71,7 +73,7 @@ public class VelocityPlayerListener {
         String server = player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName() : null;
 
         // Send the data to the backend
-        this.service.getSocketManager().sendUserData(username, userId, version, address, server, connected, isPremium);
+        this.service.getAntiVPN().getSocketManager().getSocketDataHandler()
+                .sendUserData(username, userId, version, address, server, connected, isPremium);
     }
-
 }

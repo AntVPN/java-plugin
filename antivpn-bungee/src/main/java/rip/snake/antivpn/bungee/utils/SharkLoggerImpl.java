@@ -1,9 +1,9 @@
 package rip.snake.antivpn.bungee.utils;
 
+import io.antivpn.api.logger.VPNLogger;
 import net.md_5.bungee.api.ProxyServer;
-import rip.snake.antivpn.core.utils.SharkLogger;
 
-public class SharkLoggerImpl implements SharkLogger {
+public class SharkLoggerImpl implements VPNLogger {
     @Override
     public void log(String message, Object... args) {
         ProxyServer.getInstance().getLogger().info(String.format(message, args));
