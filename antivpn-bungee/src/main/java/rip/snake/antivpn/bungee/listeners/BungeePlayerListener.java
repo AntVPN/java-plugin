@@ -2,6 +2,7 @@ package rip.snake.antivpn.bungee.listeners;
 
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
+import io.antivpn.api.utils.Event;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
@@ -58,16 +59,21 @@ public class BungeePlayerListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoin(PostLoginEvent event) {
+        this.handlePlayer(event.getPlayer(), Event.PLAYER_JOIN);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onServerConnected(ServerConnectedEvent event) {
-        this.handlePlayer(event.getPlayer(), true);
+        this.handlePlayer(event.getPlayer(), Event.PLAYER_SWITCH);
     }
 
     @EventHandler
     public void onPlayerDisconnect(PostLoginEvent event) {
-        this.handlePlayer(event.getPlayer(), false);
+        this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT);
     }
 
-    private void handlePlayer(ProxiedPlayer player, boolean connected) {
+    private void handlePlayer(ProxiedPlayer player, Event event) {
         if (player == null) return;
         String username = player.getName();
         String userId = player.getUniqueId().toString();
@@ -79,7 +85,7 @@ public class BungeePlayerListener implements Listener {
 
         // Send the data to the backend
         this.plugin.getService().getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(username, userId, version, address, serverName, connected, isPremium);
+                .sendUserData(username, userId, version, address, serverName, event, isPremium);
     }
 
 }
