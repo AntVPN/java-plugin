@@ -2,6 +2,7 @@ package rip.snake.antivpn.spigot.listeners;
 
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
+import io.antivpn.api.utils.Event;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -60,15 +61,15 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerJoin(PlayerJoinEvent event) {
-        this.handlePlayer(event.getPlayer(), true);
+        this.handlePlayer(event.getPlayer(), Event.PLAYER_JOIN);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerQuit(PlayerQuitEvent event) {
-        this.handlePlayer(event.getPlayer(), false);
+        this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT);
     }
 
-    private void handlePlayer(Player player, boolean connected) {
+    private void handlePlayer(Player player, Event event) {
         boolean isOnlineMode = Bukkit.getOnlineMode();
         String playerName = player.getName();
         String userId = player.getUniqueId().toString();
@@ -79,7 +80,7 @@ public class PlayerListener implements Listener {
 
         // Send the data to the backend server
         service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(playerName, userId, version, address, null, connected, isOnlineMode);
+                .sendUserData(playerName, userId, version, address, null, event, isOnlineMode);
     }
 
 }
