@@ -73,11 +73,12 @@
 
     <repositories>
         <repository>
+            <id>antivpn</id>
+            <url>https://repo.antivpn.io/releases</url>
+        </repository>
+        <repository>
             <id>unnamed-public</id>
             <url>https://repo.unnamed.team/repository/unnamed-public/</url>
-        </repository><repository>
-            <id>github-antivpn</id>
-            <url>https://maven.pkg.github.com/antvpn/*</url>
         </repository>
         <repository>
             <id>opencollab-snapshot</id>
