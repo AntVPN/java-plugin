@@ -34,6 +34,7 @@ public final class AntiVPNCommand implements CommandExecutor {
         String tokenId = args[0];
 
         if (tokenId.equals("check")) {
+            if (!service.getVpnConfig().isDebug()) return false;
             ThreadLocalRandom random = ThreadLocalRandom.current();
 
             CountDownLatch latch = new CountDownLatch(1000);
