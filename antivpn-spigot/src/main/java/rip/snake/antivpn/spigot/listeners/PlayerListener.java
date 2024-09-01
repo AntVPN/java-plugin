@@ -4,7 +4,6 @@ import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import io.antivpn.api.utils.Event;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,6 +17,8 @@ import rip.snake.antivpn.commons.utils.StringUtils;
 import rip.snake.antivpn.spigot.ServerAntiVPN;
 
 import java.util.concurrent.CompletableFuture;
+
+import static rip.snake.antivpn.spigot.utils.Color.colorize;
 
 public class PlayerListener implements Listener {
 
@@ -51,7 +52,7 @@ public class PlayerListener implements Listener {
                 return;
             }
 
-            event.setKickMessage(ChatColor.translateAlternateColorCodes('&', service.getVpnConfig().getDetectMessage()));
+            event.setKickMessage(colorize(service.getVpnConfig().getDetectMessage()));
             event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
         } catch (Exception e) {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());

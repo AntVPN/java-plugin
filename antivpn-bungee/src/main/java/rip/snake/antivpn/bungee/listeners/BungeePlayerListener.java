@@ -3,7 +3,6 @@ package rip.snake.antivpn.bungee.listeners;
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import io.antivpn.api.utils.Event;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
@@ -16,6 +15,8 @@ import rip.snake.antivpn.commons.utils.StringUtils;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+
+import static rip.snake.antivpn.bungee.utils.Color.colorize;
 
 public class BungeePlayerListener implements Listener {
 
@@ -44,7 +45,7 @@ public class BungeePlayerListener implements Listener {
                     return;
                 }
 
-                event.setCancelReason(TextComponent.fromLegacyText(this.plugin.getConfig().getDetectMessage()));
+                event.setCancelReason(colorize(this.plugin.getConfig().getDetectMessage()));
                 event.setCancelled(true);
                 event.completeIntent(this.plugin);
             }).exceptionally(e -> {
