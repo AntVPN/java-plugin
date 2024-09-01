@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: Build CI
 
 on:
   push:
@@ -19,6 +19,8 @@ on:
       - '*'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+permissions: write-all
 
 jobs:
   build:
