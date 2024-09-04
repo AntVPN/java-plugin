@@ -1,6 +1,7 @@
   name: ServerAntiVPN
   main: rip.snake.antivpn.spigot.ServerAntiVPN
   version: ${project.version}
+  api-version: 1.13
   softdepend:
     - ViaVersion
   commands:
