@@ -14,6 +14,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 public class VelocityPlayerListener {
@@ -78,9 +79,10 @@ public class VelocityPlayerListener {
         boolean isPremium = player.isOnlineMode();
 
         String server = player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName() : null;
+        String hostname = player.getVirtualHost().map(InetSocketAddress::getHostString).orElse(null);
 
         // Send the data to the backend
         this.service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(username, userId, version, address, server, event, isPremium);
+                .sendUserData(username, userId, version, address, server, hostname, event, isPremium);
     }
 }

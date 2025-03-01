@@ -10,12 +10,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
 import rip.snake.antivpn.spigot.ServerAntiVPN;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static rip.snake.antivpn.spigot.utils.Color.colorize;
@@ -60,6 +64,11 @@ public class PlayerListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onLogin(PlayerLoginEvent event) {
+        event.getPlayer().setMetadata("avpn-hostname", new FixedMetadataValue(this.plugin, event.getHostname()));
+    }
+
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerJoin(PlayerJoinEvent event) {
         this.handlePlayer(event.getPlayer(), Event.PLAYER_JOIN);
@@ -79,9 +88,12 @@ public class PlayerListener implements Listener {
         // get protocol version
         String version = String.valueOf(plugin.getVersionHelper().getProtocolVersion(player));
 
+        List<MetadataValue> metadatas = player.getMetadata("avpn-hostname");
+        String hostname = metadatas == null || metadatas.isEmpty() ? null : metadatas.get(0).asString();
+
         // Send the data to the backend server
         service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(playerName, userId, version, address, null, event, isOnlineMode);
+                .sendUserData(playerName, userId, version, address, null, hostname, event, isOnlineMode);
     }
 
 }

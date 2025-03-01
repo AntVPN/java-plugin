@@ -83,10 +83,11 @@ public class BungeePlayerListener implements Listener {
         boolean isPremium = player.getPendingConnection().isOnlineMode();
 
         String serverName = player.getServer() != null ? player.getServer().getInfo().getName() : null;
+        String hostname = player.getPendingConnection().getVirtualHost().getHostString();
 
         // Send the data to the backend
         this.plugin.getService().getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(username, userId, version, address, serverName, event, isPremium);
+                .sendUserData(username, userId, version, address, serverName, hostname, event, isPremium);
     }
 
 }
