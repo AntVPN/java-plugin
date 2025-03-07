@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import io.antivpn.api.utils.Event;
@@ -15,6 +16,10 @@ import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class VelocityPlayerListener {
@@ -55,14 +60,16 @@ public class VelocityPlayerListener {
         }
     }
 
-    @Subscribe(order = PostOrder.FIRST)
-    public void onAsyncPreLogin(PostLoginEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_JOIN);
-    }
+    @Subscribe
+    public void onPlayerSwitch(ServerConnectedEvent event) {
+        Player player = event.getPlayer();
+        Optional<ServerConnection> currentServer = player.getCurrentServer();
 
-    @Subscribe(order = PostOrder.LAST)
-    public void onServerConnect(ServerConnectedEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_SWITCH);
+        if (currentServer.isPresent()) {
+            this.handlePlayer(player, Event.PLAYER_SWITCH);
+        } else {
+            this.handlePlayer(player, Event.PLAYER_JOIN);
+        }
     }
 
     @Subscribe(order = PostOrder.LAST)
