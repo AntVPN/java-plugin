@@ -3,17 +3,19 @@ package rip.snake.antivpn.bungee.listeners;
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import io.antivpn.api.utils.Event;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectedEvent;
+import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import rip.snake.antivpn.bungee.ServerAntiVPN;
 import rip.snake.antivpn.commons.utils.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static rip.snake.antivpn.bungee.utils.Color.colorize;
@@ -21,6 +23,7 @@ import static rip.snake.antivpn.bungee.utils.Color.colorize;
 public class BungeePlayerListener implements Listener {
 
     private final ServerAntiVPN plugin;
+    private final Map<UUID, ServerInfo> players = new HashMap<>();
 
     public BungeePlayerListener(ServerAntiVPN plugin) {
         this.plugin = plugin;
@@ -69,8 +72,29 @@ public class BungeePlayerListener implements Listener {
         this.handlePlayer(event.getPlayer(), Event.PLAYER_SWITCH);
     }
 
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerJoin(ServerSwitchEvent event) {
+        ProxiedPlayer player = event.getPlayer();
+
+        if (!this.players.containsKey(player.getUniqueId())) {
+            handlePlayer(player, Event.PLAYER_JOIN);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerSwitch(ServerSwitchEvent event) {
+        ProxiedPlayer player = event.getPlayer();
+
+        ServerInfo next = player.getServer().getInfo();
+        ServerInfo previous = this.players.put(player.getUniqueId(), next);
+
+        if (previous != null) {
+            handlePlayer(player, Event.PLAYER_SWITCH);
+        }
+    }
+
     @EventHandler
-    public void onPlayerDisconnect(PostLoginEvent event) {
+    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT);
     }
 
