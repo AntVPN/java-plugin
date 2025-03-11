@@ -90,7 +90,7 @@
         <dependency>
             <groupId>io.antivpn</groupId>
             <artifactId>serverantivpn-api</artifactId>
-            <version>1.0.6-RELEASE</version>
+            <version>1.0.7-RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

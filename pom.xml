@@ -14,7 +14,7 @@
 
     <properties>
         <BUILD_NUMBER>1</BUILD_NUMBER>
-        <ANTIVPN_VERSION>1.5.2-BETA</ANTIVPN_VERSION>
+        <ANTIVPN_VERSION>1.5.3-BETA</ANTIVPN_VERSION>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
