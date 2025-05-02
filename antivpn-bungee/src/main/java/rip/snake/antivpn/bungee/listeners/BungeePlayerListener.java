@@ -43,12 +43,24 @@ public class BungeePlayerListener implements Listener {
 
 
             Objects.requireNonNull(response, "Server is offline :C").thenAccept(result -> {
-                if (result == null || result.isValid()) {
+                if (result == null) {
                     event.completeIntent(this.plugin);
                     return;
                 }
 
-                event.setCancelReason(colorize(this.plugin.getConfig().getDetectMessage()));
+                if (result.isAttack()) {
+                    event.setCancelReason(colorize(this.plugin.getService().getAntiVPN().getSocketManager().getShieldKick()));
+                    event.setCancelled(true);
+                    event.completeIntent(this.plugin);
+                    return;
+                }
+
+                if (result.isValid()) {
+                    event.completeIntent(this.plugin);
+                    return;
+                }
+
+                event.setCancelReason(colorize(this.plugin.getService().getAntiVPN().getSocketManager().getResponseKick()));
                 event.setCancelled(true);
                 event.completeIntent(this.plugin);
             }).exceptionally(e -> {

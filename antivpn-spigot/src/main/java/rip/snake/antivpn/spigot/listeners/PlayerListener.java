@@ -43,23 +43,33 @@ public class PlayerListener implements Listener {
         String address = event.getAddress().getHostAddress();
 
         try {
-            CompletableFuture<CheckResponse> response = service.getAntiVPN().getSocketManager().getSocketDataHandler()
+            CompletableFuture<CheckResponse> response = this.service.getAntiVPN().getSocketManager().getSocketDataHandler()
                     .verify(new CheckRequest(StringUtils.cleanAddress(address), event.getName()));
             if (response == null) {
-                service.getLogger().error(
+                this.service.getLogger().error(
                         "Failed to verify " + event.getName() + " (" + address + ")! Backend is not connected"
                 );
                 return;
             }
             CheckResponse result = response.get();
-            if (result == null || result.isValid()) {
+            if (result == null) {
                 return;
             }
 
-            event.setKickMessage(colorize(service.getVpnConfig().getDetectMessage()));
+            if (result.isAttack()) {
+                event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getResponseKick()));
+                event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
+                return;
+            }
+
+            if (result.isValid()) {
+                return;
+            }
+
+            event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getShieldKick()));
             event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
         } catch (Exception e) {
-            service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
+            this.service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
             e.printStackTrace();
         }
     }

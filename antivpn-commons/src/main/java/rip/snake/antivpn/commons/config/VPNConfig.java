@@ -9,11 +9,11 @@ import java.util.logging.Level;
 @Data
 @AllArgsConstructor
 public class VPNConfig {
-
     private final boolean debug;
 
     private String secret;
     private String detectMessage;
+    private String shieldMessage;
     private int cacheTimeout;
     private String level;
 
@@ -22,6 +22,7 @@ public class VPNConfig {
                 false,
                 "secret",
                 "§cVPN Detected!\n§cPlease disable your VPN and rejoin.\n§cIf you believe this is a mistake, please contact an administrator.",
+                "§cShield is enabled!\n§cPlease wait a couple seconds before joining.\n§cIf you believe this is a mistake, please contact an administrator.",
                 120,
                 Level.INFO.getName()
         );

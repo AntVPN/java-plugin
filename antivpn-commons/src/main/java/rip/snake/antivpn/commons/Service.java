@@ -11,7 +11,6 @@ import rip.snake.antivpn.commons.utils.ConfigUtils;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Timer;
-import java.util.logging.Level;
 
 @Data
 public class Service {
@@ -42,11 +41,15 @@ public class Service {
 
         this.vpnConfig = ConfigUtils.loadConfig(this.home.resolve("config.json"), console);
         this.vpnConfig.write(antiVPNConfig);
+        this.saveConfig();
 
         this.antiVPN = AntiVPN.create(
                 "ServerAntiVPN v" + version, this.logger, this.console,
                 antiVPNConfig, Duration.ofSeconds(30)
         );
+
+        this.antiVPN.getSocketManager().setResponseKick(this.vpnConfig.getDetectMessage());
+        this.antiVPN.getSocketManager().setShieldKick(this.vpnConfig.getShieldMessage());
     }
 
     public void onLoad() {

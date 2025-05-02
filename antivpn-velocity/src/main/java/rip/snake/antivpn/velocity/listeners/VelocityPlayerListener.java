@@ -3,7 +3,6 @@ package rip.snake.antivpn.velocity.listeners;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
@@ -16,10 +15,7 @@ import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class VelocityPlayerListener {
@@ -48,11 +44,23 @@ public class VelocityPlayerListener {
                 return;
             }
             CheckResponse result = response.get();
-            if (result == null || result.isValid()) {
+            if (result == null) {
                 return;
             }
+
+            if (result.isAttack()) {
+                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
+                        legacy.deserialize(service.getAntiVPN().getSocketManager().getShieldKick())
+                ));
+                return;
+            }
+
+            if (result.isValid()) {
+                return;
+            }
+
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                    legacy.deserialize(service.getVpnConfig().getDetectMessage())
+                    legacy.deserialize(service.getAntiVPN().getSocketManager().getResponseKick())
             ));
         } catch (Exception e) {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
