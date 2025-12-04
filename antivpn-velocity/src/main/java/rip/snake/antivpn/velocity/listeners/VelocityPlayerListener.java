@@ -27,7 +27,7 @@ public class VelocityPlayerListener {
         this.service = service;
     }
 
-    @Subscribe(order = PostOrder.FIRST)
+    @Subscribe(order = PostOrder.LAST)
     public void onAsyncPreLogin(PreLoginEvent event) {
         if (!event.getResult().isAllowed()) {
             return;
