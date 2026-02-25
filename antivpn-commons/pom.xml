@@ -21,7 +21,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-
     <build>
         <plugins>
             <plugin>
@@ -90,7 +89,7 @@
         <dependency>
             <groupId>io.antivpn</groupId>
             <artifactId>serverantivpn-api</artifactId>
-            <version>1.0.8-RELEASE</version>
+            <version>1.0.12-RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -19,7 +19,10 @@ import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
 import rip.snake.antivpn.spigot.ServerAntiVPN;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static rip.snake.antivpn.spigot.utils.Color.colorize;
@@ -28,6 +31,8 @@ public class PlayerListener implements Listener {
 
     private final Service service;
     private final ServerAntiVPN plugin;
+
+    private final Map<UUID, String> sessions = new HashMap<>();
 
     public PlayerListener(ServerAntiVPN plugin) {
         this.plugin = plugin;
@@ -41,10 +46,12 @@ public class PlayerListener implements Listener {
             return;
         }
         String address = event.getAddress().getHostAddress();
+        String userId = event.getUniqueId().toString();
+        String username = event.getName();
 
         try {
             CompletableFuture<CheckResponse> response = this.service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                    .verify(new CheckRequest(StringUtils.cleanAddress(address), event.getName()));
+                    .verify(new CheckRequest(StringUtils.cleanAddress(address), userId, username));
             if (response == null) {
                 this.service.getLogger().error(
                         "Failed to verify " + event.getName() + " (" + address + ")! Backend is not connected"
@@ -57,16 +64,17 @@ public class PlayerListener implements Listener {
             }
 
             if (result.isAttack()) {
-                event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getResponseKick()));
+                event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getShieldKick()));
                 event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
                 return;
             }
 
             if (result.isValid()) {
+                this.sessions.put(event.getUniqueId(), result.getSessionId());
                 return;
             }
 
-            event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getShieldKick()));
+            event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getResponseKick()));
             event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
         } catch (Exception e) {
             this.service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
@@ -100,10 +108,11 @@ public class PlayerListener implements Listener {
 
         List<MetadataValue> metadatas = player.getMetadata("avpn-hostname");
         String hostname = metadatas == null || metadatas.isEmpty() ? null : metadatas.get(0).asString();
+        String checkId = event == Event.PLAYER_QUIT ? this.sessions.remove(player.getUniqueId()) : this.sessions.get(player.getUniqueId());
 
         // Send the data to the backend server
         service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(playerName, userId, version, address, null, hostname, event, isOnlineMode);
+                .sendUserData(checkId, playerName, userId, version, address, null, hostname, event, isOnlineMode);
     }
 
 }
