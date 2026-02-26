@@ -10,9 +10,9 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import io.antivpn.api.utils.Event;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
+import rip.snake.antivpn.velocity.utils.Color;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class VelocityPlayerListener {
 
-    public static final LegacyComponentSerializer legacy = LegacyComponentSerializer.legacy('&');
+    
     private final Service service;
 
     public VelocityPlayerListener(Service service) {
@@ -50,7 +50,7 @@ public class VelocityPlayerListener {
 
             if (result.isAttack()) {
                 event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                        legacy.deserialize(service.getAntiVPN().getSocketManager().getShieldKick())
+                        Color.colorize(service.getAntiVPN().getSocketManager().getShieldKick())
                 ));
                 return;
             }
@@ -60,7 +60,7 @@ public class VelocityPlayerListener {
             }
 
             event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                    legacy.deserialize(service.getAntiVPN().getSocketManager().getResponseKick())
+                    Color.colorize(service.getAntiVPN().getSocketManager().getResponseKick())
             ));
         } catch (Exception e) {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
