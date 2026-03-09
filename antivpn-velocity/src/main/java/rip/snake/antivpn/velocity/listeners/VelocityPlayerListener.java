@@ -1,45 +1,54 @@
 package rip.snake.antivpn.velocity.listeners;
 
 import com.velocitypowered.api.event.PostOrder;
+import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import io.antivpn.api.utils.Event;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
-import rip.snake.antivpn.velocity.utils.Color;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class VelocityPlayerListener {
 
-    
+    public static final LegacyComponentSerializer legacy = LegacyComponentSerializer.legacy('&');
     private final Service service;
+
+    private final Map<UUID, String> sessions = new HashMap<>();
 
     public VelocityPlayerListener(Service service) {
         this.service = service;
     }
 
     @Subscribe(order = PostOrder.LAST)
-    public void onAsyncPreLogin(PreLoginEvent event) {
+    public void onAsyncPreLogin(LoginEvent event) {
         if (!event.getResult().isAllowed()) {
             return;
         }
-        String address = event.getConnection().getRemoteAddress().getAddress().getHostAddress();
+
+        String address = event.getPlayer().getRemoteAddress().getAddress().getHostAddress();
+        String userId = event.getPlayer().getUniqueId().toString();
+        String username = event.getPlayer().getUsername();
 
         try {
             CompletableFuture<CheckResponse> response = service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                    .verify(new CheckRequest(StringUtils.cleanAddress(address), event.getUsername()));
+                    .verify(new CheckRequest(StringUtils.cleanAddress(address), userId, username));
             if (response == null) {
                 service.getLogger().error(
-                        "Failed to verify " + event.getUsername() + " (" + address + ")! Backend is not connected"
+                        "Failed to verify " + username + " (" + address + ")! Backend is not connected"
                 );
                 return;
             }
@@ -49,18 +58,19 @@ public class VelocityPlayerListener {
             }
 
             if (result.isAttack()) {
-                event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                        Color.colorize(service.getAntiVPN().getSocketManager().getShieldKick())
+                event.setResult(ResultedEvent.ComponentResult.denied(
+                        legacy.deserialize(service.getAntiVPN().getSocketManager().getShieldKick())
                 ));
                 return;
             }
 
             if (result.isValid()) {
+                this.sessions.put(event.getPlayer().getUniqueId(), result.getSessionId());
                 return;
             }
 
-            event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
-                    Color.colorize(service.getAntiVPN().getSocketManager().getResponseKick())
+            event.setResult(ResultedEvent.ComponentResult.denied(
+                    legacy.deserialize(result.getKickMessage())
             ));
         } catch (Exception e) {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
@@ -95,9 +105,10 @@ public class VelocityPlayerListener {
 
         String server = player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName() : null;
         String hostname = player.getVirtualHost().map(InetSocketAddress::getHostString).orElse(null);
+        String checkId = event == Event.PLAYER_QUIT ? this.sessions.remove(player.getUniqueId()) : this.sessions.get(player.getUniqueId());
 
         // Send the data to the backend
         this.service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(username, userId, version, address, server, hostname, event, isPremium);
+                .sendUserData(checkId, username, userId, version, address, server, hostname, event, isPremium);
     }
 }

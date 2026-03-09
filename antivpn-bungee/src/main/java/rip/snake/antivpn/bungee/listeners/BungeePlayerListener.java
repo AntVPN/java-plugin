@@ -24,6 +24,7 @@ public class BungeePlayerListener implements Listener {
 
     private final ServerAntiVPN plugin;
     private final Map<UUID, ServerInfo> players = new HashMap<>();
+    private final Map<UUID, String> sessions = new HashMap<>();
 
     public BungeePlayerListener(ServerAntiVPN plugin) {
         this.plugin = plugin;
@@ -33,14 +34,15 @@ public class BungeePlayerListener implements Listener {
     public void onPreLogin(PreLoginEvent event) {
         if (event.isCancelled() || event.getConnection() == null) return;
         String address = event.getConnection().getSocketAddress().toString();
+        String username = event.getConnection().getName();
+        String userId = event.getConnection().getUniqueId().toString();
 
         event.registerIntent(this.plugin);
 
         try {
             CompletableFuture<CheckResponse> response = this.plugin.getService().getAntiVPN()
                     .getSocketManager().getSocketDataHandler()
-                    .verify(new CheckRequest(StringUtils.cleanAddress(address), event.getConnection().getName()));
-
+                    .verify(new CheckRequest(StringUtils.cleanAddress(address), userId, username));
 
             Objects.requireNonNull(response, "Server is offline :C").thenAccept(result -> {
                 if (result == null) {
@@ -57,6 +59,7 @@ public class BungeePlayerListener implements Listener {
 
                 if (result.isValid()) {
                     event.completeIntent(this.plugin);
+                    this.sessions.put(event.getConnection().getUniqueId(), result.getSessionId());
                     return;
                 }
 
@@ -120,10 +123,11 @@ public class BungeePlayerListener implements Listener {
 
         String serverName = player.getServer() != null ? player.getServer().getInfo().getName() : null;
         String hostname = player.getPendingConnection().getVirtualHost().getHostString();
+        String checkId = event == Event.PLAYER_QUIT ? this.sessions.remove(player.getUniqueId()) : this.sessions.get(player.getUniqueId());
 
         // Send the data to the backend
         this.plugin.getService().getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(username, userId, version, address, serverName, hostname, event, isPremium);
+                .sendUserData(checkId, username, userId, version, address, serverName, hostname, event, isPremium);
     }
 
 }

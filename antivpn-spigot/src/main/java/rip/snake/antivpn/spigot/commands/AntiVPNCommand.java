@@ -2,6 +2,7 @@ package rip.snake.antivpn.spigot.commands;
 
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
+import io.antivpn.api.utils.Event;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -47,9 +48,11 @@ public final class AntiVPNCommand implements CommandExecutor {
                 int thirdOctet = random.nextInt(256);
                 int fourthOctet = random.nextInt(256);
                 String randomIp = firstOctet + "." + secondOctet + "." + thirdOctet + "." + fourthOctet;
+                String username = "username_" + firstOctet + "_" + secondOctet + "_" + thirdOctet + "_" + fourthOctet;
+                String userId = "uuid_" + firstOctet + "_" + secondOctet + "_" + thirdOctet + "_" + fourthOctet;
 
                 CompletableFuture<CheckResponse> checkResponseWatchableInvoker = service.getAntiVPN().getSocketManager().getSocketDataHandler().verify(
-                        new CheckRequest(randomIp, firstOctet + "_" + secondOctet + "_" + thirdOctet + "_" + fourthOctet)
+                        new CheckRequest(randomIp, userId, username)
                 );
 
                 checkResponseWatchableInvoker.thenAccept(calling -> {
@@ -72,6 +75,53 @@ public final class AntiVPNCommand implements CommandExecutor {
 
             double realDuration = duration / 1000.0;
             System.out.printf("Handled 1000 requests in just %.2f seconds.", realDuration).println();
+            return true;
+        } else if (tokenId.equalsIgnoreCase("check2")) {
+            if (!service.getVpnConfig().isDebug()) return false;
+            ThreadLocalRandom random = ThreadLocalRandom.current();
+
+            CountDownLatch latch = new CountDownLatch(100);
+            long startTime = System.nanoTime();
+
+            for (int i = 0; i < 100; i++) {
+                int firstOctet = random.nextInt(256);
+                int secondOctet = random.nextInt(256);
+                int thirdOctet = random.nextInt(256);
+                int fourthOctet = random.nextInt(256);
+
+                String randomIp = firstOctet + "." + secondOctet + "." + thirdOctet + "." + fourthOctet;
+                String username = "username_" + firstOctet + "_" + secondOctet + "_" + thirdOctet + "_" + fourthOctet;
+                String userId = "uuid_" + firstOctet + "_" + secondOctet + "_" + thirdOctet + "_" + fourthOctet;
+
+                CompletableFuture<CheckResponse> checkResponseWatchableInvoker = service.getAntiVPN().getSocketManager().getSocketDataHandler().verify(
+                        new CheckRequest(randomIp, userId, username)
+                );
+                checkResponseWatchableInvoker.thenAccept(calling -> {
+                    service.getAntiVPN().getSocketManager().getSocketDataHandler().sendUserData(
+                            calling.getSessionId(),
+                            username,
+                            userId,
+                            "1.21.4",
+                            randomIp,
+                            "survival",
+                            "hostname",
+                            Event.PLAYER_JOIN,
+                            true
+                    );
+                    latch.countDown();
+                });
+            }
+
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            long endTime = System.nanoTime() - startTime;
+            long duration = endTime / 1000;
+            double realDuration = duration / 1000.0;
+            System.out.printf("Handled 100 requests in just %.2f seconds.", realDuration).println();
             return true;
         }
 
