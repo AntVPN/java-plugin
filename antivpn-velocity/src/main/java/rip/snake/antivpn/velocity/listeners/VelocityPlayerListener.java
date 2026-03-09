@@ -8,12 +8,15 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import com.velocitypowered.api.proxy.server.ServerInfo;
 import io.antivpn.api.data.socket.request.impl.CheckRequest;
 import io.antivpn.api.data.socket.response.impl.CheckResponse;
 import io.antivpn.api.utils.Event;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import rip.snake.antivpn.commons.Service;
 import rip.snake.antivpn.commons.utils.StringUtils;
+import rip.snake.antivpn.velocity.utils.Color;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -59,7 +62,7 @@ public class VelocityPlayerListener {
 
             if (result.isAttack()) {
                 event.setResult(ResultedEvent.ComponentResult.denied(
-                        legacy.deserialize(service.getAntiVPN().getSocketManager().getShieldKick())
+                        Color.colorize(service.getAntiVPN().getSocketManager().getShieldKick())
                 ));
                 return;
             }
@@ -70,7 +73,7 @@ public class VelocityPlayerListener {
             }
 
             event.setResult(ResultedEvent.ComponentResult.denied(
-                    legacy.deserialize(result.getKickMessage())
+                    Color.colorize(service.getAntiVPN().getSocketManager().getResponseKick())
             ));
         } catch (Exception e) {
             service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
@@ -81,21 +84,26 @@ public class VelocityPlayerListener {
     @Subscribe
     public void onPlayerSwitch(ServerConnectedEvent event) {
         Player player = event.getPlayer();
-        Optional<ServerConnection> currentServer = player.getCurrentServer();
+        Optional<RegisteredServer> previous = event.getPreviousServer();
+        RegisteredServer current = event.getServer();
 
-        if (currentServer.isPresent()) {
-            this.handlePlayer(player, Event.PLAYER_SWITCH);
-        } else {
-            this.handlePlayer(player, Event.PLAYER_JOIN);
+        if (previous.isEmpty()) {
+            // First server after connecting to the proxy = logical join
+            this.handlePlayer(player, Event.PLAYER_JOIN, current.getServerInfo().getName());
+        } else if (!previous.get().getServerInfo().getName().equals(current.getServerInfo().getName())) {
+            // Actual server switch
+            this.handlePlayer(player, Event.PLAYER_SWITCH, current.getServerInfo().getName());
         }
     }
 
+
     @Subscribe(order = PostOrder.LAST)
     public void onPlayerDisconnect(DisconnectEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT);
+        String serverName = event.getPlayer().getCurrentServer().map(ServerConnection::getServerInfo).map(ServerInfo::getName).orElse(null);
+        this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT, serverName);
     }
 
-    private void handlePlayer(Player player, Event event) {
+    private void handlePlayer(Player player, Event event, String serverName) {
         if (player == null) return;
         String username = player.getUsername();
         String userId = player.getUniqueId().toString();
@@ -103,12 +111,11 @@ public class VelocityPlayerListener {
         String version = String.valueOf(player.getProtocolVersion().getProtocol());
         boolean isPremium = player.isOnlineMode();
 
-        String server = player.getCurrentServer().isPresent() ? player.getCurrentServer().get().getServerInfo().getName() : null;
         String hostname = player.getVirtualHost().map(InetSocketAddress::getHostString).orElse(null);
         String checkId = event == Event.PLAYER_QUIT ? this.sessions.remove(player.getUniqueId()) : this.sessions.get(player.getUniqueId());
 
         // Send the data to the backend
         this.service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(checkId, username, userId, version, address, server, hostname, event, isPremium);
+                .sendUserData(checkId, username, userId, version, address, serverName, hostname, event, isPremium);
     }
 }

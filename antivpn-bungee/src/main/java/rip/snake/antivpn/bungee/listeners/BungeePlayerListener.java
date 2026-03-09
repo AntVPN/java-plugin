@@ -12,6 +12,7 @@ import net.md_5.bungee.event.EventPriority;
 import rip.snake.antivpn.bungee.ServerAntiVPN;
 import rip.snake.antivpn.commons.utils.StringUtils;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +24,6 @@ import static rip.snake.antivpn.bungee.utils.Color.colorize;
 public class BungeePlayerListener implements Listener {
 
     private final ServerAntiVPN plugin;
-    private final Map<UUID, ServerInfo> players = new HashMap<>();
     private final Map<UUID, String> sessions = new HashMap<>();
 
     public BungeePlayerListener(ServerAntiVPN plugin) {
@@ -33,7 +33,7 @@ public class BungeePlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent event) {
         if (event.isCancelled() || event.getConnection() == null) return;
-        String address = event.getConnection().getSocketAddress().toString();
+        String address = ((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress();
         String username = event.getConnection().getName();
         String userId = event.getConnection().getUniqueId().toString();
 
@@ -58,8 +58,8 @@ public class BungeePlayerListener implements Listener {
                 }
 
                 if (result.isValid()) {
-                    event.completeIntent(this.plugin);
                     this.sessions.put(event.getConnection().getUniqueId(), result.getSessionId());
+                    event.completeIntent(this.plugin);
                     return;
                 }
 
@@ -77,52 +77,37 @@ public class BungeePlayerListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoin(PostLoginEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_JOIN);
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onServerConnected(ServerConnectedEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_SWITCH);
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerJoin(ServerSwitchEvent event) {
+    @EventHandler
+    public void onServerSwitch(ServerSwitchEvent event) {
         ProxiedPlayer player = event.getPlayer();
+        ServerInfo from = event.getFrom();
+        ServerInfo to = player.getServer().getInfo();
 
-        if (!this.players.containsKey(player.getUniqueId())) {
-            handlePlayer(player, Event.PLAYER_JOIN);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerSwitch(ServerSwitchEvent event) {
-        ProxiedPlayer player = event.getPlayer();
-
-        ServerInfo next = player.getServer().getInfo();
-        ServerInfo previous = this.players.put(player.getUniqueId(), next);
-
-        if (previous != null) {
-            handlePlayer(player, Event.PLAYER_SWITCH);
+        if (from == null) {
+            // First server after connecting to the proxy = logical join
+            this.handlePlayer(player, Event.PLAYER_JOIN, to.getName());
+        } else if (!from.getName().equals(to.getName())) {
+            // Actual server switch
+            this.handlePlayer(player, Event.PLAYER_SWITCH, to.getName());
         }
     }
 
     @EventHandler
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT);
+        String serverName = event.getPlayer().getServer() != null ? event.getPlayer().getServer().getInfo().getName() : null;
+        this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT, serverName);
     }
 
-    private void handlePlayer(ProxiedPlayer player, Event event) {
+    private void handlePlayer(ProxiedPlayer player, Event event, String serverName) {
         if (player == null) return;
         String username = player.getName();
         String userId = player.getUniqueId().toString();
-        String address = player.getSocketAddress().toString();
+        String address = ((InetSocketAddress) player.getSocketAddress()).getAddress().getHostAddress();
         String version = String.valueOf(player.getPendingConnection().getVersion());
         boolean isPremium = player.getPendingConnection().isOnlineMode();
 
-        String serverName = player.getServer() != null ? player.getServer().getInfo().getName() : null;
-        String hostname = player.getPendingConnection().getVirtualHost().getHostString();
+        InetSocketAddress virtualHost = player.getPendingConnection().getVirtualHost();
+        String hostname = virtualHost != null ? virtualHost.getHostString() : null;
         String checkId = event == Event.PLAYER_QUIT ? this.sessions.remove(player.getUniqueId()) : this.sessions.get(player.getUniqueId());
 
         // Send the data to the backend
