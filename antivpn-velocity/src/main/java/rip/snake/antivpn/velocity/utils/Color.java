@@ -1,23 +1,17 @@
-package rip.snake.antivpn.bungee.utils;
+package rip.snake.antivpn.velocity.utils;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
-import net.md_5.bungee.api.chat.BaseComponent;
 
 public class Color {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private static final BungeeComponentSerializer BUNGEE_SERIALIZER = BungeeComponentSerializer.get();
 
-    public static BaseComponent[] colorize(String message) {
-        if (message == null) return null;
+    public static Component colorize(String text) {
+        if (text == null) return null;
         
-        // 1. Parse both & and MiniMessage into a clean Component
-        Component component = parseToComponent(message);
-        
-        // 2. Convert the Adventure Component directly to BungeeCord's native BaseComponent[]
-        return BUNGEE_SERIALIZER.serialize(component);
+        // 1. Parse both & and MiniMessage into a clean Component natively via replacement
+        return parseToComponent(text);
     }
 
     private static Component parseToComponent(String text) {
