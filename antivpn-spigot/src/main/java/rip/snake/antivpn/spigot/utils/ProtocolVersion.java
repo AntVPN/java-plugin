@@ -51,7 +51,17 @@ public enum ProtocolVersion {
     MINECRAFT_1_19_4(762, "1.19.4"),
     MINECRAFT_1_20(763, "1.20", "1.20.1"),
     MINECRAFT_1_20_2(764, "1.20.2"),
-    MINECRAFT_1_20_3(765, "1.20.3", "1.20.4");
+    MINECRAFT_1_20_3(765, "1.20.3", "1.20.4"),
+    MINECRAFT_1_20_5(766, "1.20.5", "1.20.6"),
+    MINECRAFT_1_21(767, "1.21", "1.21.1"),
+    MINECRAFT_1_21_2(768, "1.21.2", "1.21.3"),
+    MINECRAFT_1_21_4(769, "1.21.4"),
+    MINECRAFT_1_21_5(770, "1.21.5"),
+    MINECRAFT_1_21_6(771, "1.21.6"),
+    MINECRAFT_1_21_7(772, "1.21.7", "1.21.8"),
+    MINECRAFT_1_21_8(773, "1.21.9", "1.21.10"),
+    MINECRAFT_1_21_9(774, "1.21.11"),
+    ;
 
     private static final Map<String, ProtocolVersion> VERSION_TO_PROTOCOL_CONSTANT = Maps.newConcurrentMap();
 
