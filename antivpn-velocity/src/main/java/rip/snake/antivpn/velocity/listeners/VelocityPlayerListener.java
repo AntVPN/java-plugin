@@ -75,8 +75,7 @@ public class VelocityPlayerListener {
                     Color.colorize(service.getAntiVPN().getSocketManager().getResponseKick())
             ));
         } catch (Exception e) {
-            service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
-            e.printStackTrace();
+            service.getLogger().error("Failed to verify " + address + "! The server take long than expected.");
         }
     }
 
