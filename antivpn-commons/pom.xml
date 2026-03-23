@@ -114,7 +114,7 @@
         <dependency>
             <groupId>io.antivpn</groupId>
             <artifactId>serverantivpn-api</artifactId>
-            <version>1.0.14-RELEASE</version>
+            <version>1.0.15-RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

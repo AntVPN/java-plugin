@@ -27,7 +27,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class VelocityPlayerListener {
 
-    public static final LegacyComponentSerializer legacy = LegacyComponentSerializer.legacy('&');
     private final Service service;
 
     private final Map<UUID, String> sessions = new HashMap<>();
