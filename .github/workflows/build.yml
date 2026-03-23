@@ -2,14 +2,12 @@ name: Build CI
 
 on:
   push:
-    branches: [ "main" ]
     tags:
-      - '*'
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+      - '*' # Triggers automatically ONLY when a tag is pushed
+  workflow_dispatch: # Allows manual runs from the Actions tab
 
-permissions: write-all
+permissions:
+  contents: write # Minimum permission required to create a release
 
 jobs:
   build:
@@ -29,11 +27,9 @@ jobs:
         run: mvn -B package --file pom.xml
 
       - name: Create Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}"
-          prerelease: "${{ github.ref_type != 'tag' }}"
-          title: "${{ github.ref_type == 'tag' && github.ref_name || 'Latest Build' }}"
+          name: Release ${{ github.ref_name }}
+          prerelease: false
           files: |
             antivpn-multiplatform/target/AntiVPN*.jar
