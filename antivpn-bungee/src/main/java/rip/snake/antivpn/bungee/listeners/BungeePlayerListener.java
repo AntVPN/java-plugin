@@ -13,6 +13,7 @@ import rip.snake.antivpn.bungee.ServerAntiVPN;
 import rip.snake.antivpn.commons.utils.StringUtils;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -35,7 +36,8 @@ public class BungeePlayerListener implements Listener {
         if (event.isCancelled() || event.getConnection() == null) return;
         String address = ((InetSocketAddress) event.getConnection().getSocketAddress()).getAddress().getHostAddress();
         String username = event.getConnection().getName();
-        String userId = event.getConnection().getUniqueId().toString();
+        UUID uniqueId = resolveUniqueId(event.getConnection().getUniqueId(), username);
+        String userId = uniqueId.toString();
 
         event.registerIntent(this.plugin);
 
@@ -58,7 +60,7 @@ public class BungeePlayerListener implements Listener {
                 }
 
                 if (result.isValid()) {
-                    this.sessions.put(event.getConnection().getUniqueId(), result.getSessionId());
+                    this.sessions.put(uniqueId, result.getSessionId());
                     event.completeIntent(this.plugin);
                     return;
                 }
@@ -75,6 +77,15 @@ public class BungeePlayerListener implements Listener {
             this.plugin.getLogger().severe("Failed to verify address " + address + "! " + e.getMessage());
             event.completeIntent(this.plugin);
         }
+    }
+
+    private UUID resolveUniqueId(UUID uniqueId, String username) {
+        if (uniqueId != null) return uniqueId;
+        // The PreLoginEvent can fire before the proxy has resolved the player's
+        // UUID (e.g. offline mode or while an antibot is delaying the login), in
+        // which case getUniqueId() is null. Fall back to the offline UUID, which
+        // matches the id the proxy assigns in offline mode.
+        return UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
     }
 
     @EventHandler
