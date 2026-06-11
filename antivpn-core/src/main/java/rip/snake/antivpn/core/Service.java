@@ -38,8 +38,12 @@ public class Service {
         AntiVPNConfig antiVPNConfig = this.vpnConfig.toAntiVPNConfig();
         this.saveConfig();
 
+        String userAgent = this.vpnConfig.getUserAgent() != null
+                ? this.vpnConfig.getUserAgent()
+                : "ServerAntiVPN v" + version;
+
         this.antiVPN = AntiVPN.create(
-                "ServerAntiVPN v" + version, this.logger,
+                userAgent, this.logger,
                 antiVPNConfig, Duration.ofSeconds(30)
         );
 

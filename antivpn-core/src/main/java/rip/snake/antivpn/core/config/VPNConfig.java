@@ -18,6 +18,7 @@ public class VPNConfig {
     private @Nullable String endpoint;
     private int cacheTimeout;
     private String level;
+    private @Nullable String userAgent;
 
     public VPNConfig() {
         this(
@@ -27,7 +28,8 @@ public class VPNConfig {
                 "§cShield is enabled!\n§cPlease wait a couple seconds before joining.\n§cIf you believe this is a mistake, please contact an administrator.",
                 null,
                 120,
-                Level.INFO.getName()
+                Level.INFO.getName(),
+                null
         );
     }
 
