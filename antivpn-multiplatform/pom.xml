@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -80,7 +80,7 @@
     <dependencies>
         <dependency>
             <groupId>rip.snake</groupId>
-            <artifactId>antivpn-commons</artifactId>
+            <artifactId>antivpn-core</artifactId>
             <version>${pom.version}</version>
             <scope>compile</scope>
         </dependency>

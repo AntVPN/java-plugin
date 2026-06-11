@@ -15,13 +15,13 @@
     <properties>
         <BUILD_NUMBER>1</BUILD_NUMBER>
         <ANTIVPN_VERSION>1.5.8-BETA</ANTIVPN_VERSION>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <modules>
         <module>antivpn-bungee</module>
-        <module>antivpn-commons</module>
+        <module>antivpn-core</module>
         <module>antivpn-multiplatform</module>
         <module>antivpn-spigot</module>
         <module>antivpn-velocity</module>

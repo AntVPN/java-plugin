@@ -4,14 +4,15 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
-import rip.snake.antivpn.commons.Service;
+import rip.snake.antivpn.core.Service;
+import rip.snake.antivpn.core.utils.TokenCommand;
 
 public class AntiVPNCommand extends Command {
 
     private final Service service;
 
     public AntiVPNCommand(Service service) {
-        super("antivpn");  // Command name
+        super("antivpn");
         this.service = service;
     }
 
@@ -22,22 +23,13 @@ public class AntiVPNCommand extends Command {
             return;
         }
 
-
         if (args.length == 1) {
             String tokenId = args[0];
-            boolean success = processTokenId(tokenId, service);
-            if (success) {
-                sender.sendMessage(new TextComponent("Token processed successfully!"));
-            } else {
-                sender.sendMessage(new TextComponent("Failed to process token."));
-            }
+            boolean success = TokenCommand.processToken(tokenId, service);
+            sender.sendMessage(new TextComponent(success ? "Token processed successfully!" : "Failed to process token."));
         } else {
             sender.sendMessage(new TextComponent("Usage: /antivpn <tokenId>"));
         }
     }
 
-    private boolean processTokenId(String tokenId, Service service) {
-        service.getVpnConfig().setSecret(tokenId);
-        return service.saveConfig();
-    }
 }

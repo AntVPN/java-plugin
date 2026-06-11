@@ -1,28 +1,16 @@
 package rip.snake.antivpn.spigot.utils;
 
-import io.antivpn.api.logger.VPNLogger;
+import io.antivpn.api.logging.VPNLogger;
 import org.bukkit.Bukkit;
+import rip.snake.antivpn.core.utils.LoggerFactory;
 
-public class SharkLoggerImpl implements VPNLogger {
+public class SharkLoggerImpl {
 
-    @Override
-    public void log(String message, Object... args) {
-        Bukkit.getConsoleSender().sendMessage(String.format(message, args));
-    }
-
-    @Override
-    public void fine(String message, Object... args) {
-        Bukkit.getConsoleSender().sendMessage(String.format(message, args));
-    }
-
-    @Override
-    public void error(String message, Object... args) {
-        Bukkit.getConsoleSender().sendMessage(String.format(message, args));
-    }
-
-    @Override
-    public void debug(String message, Object... args) {
-        Bukkit.getConsoleSender().sendMessage(String.format(message, args));
+    public static VPNLogger create() {
+        return LoggerFactory.fromConsumer(
+                msg -> Bukkit.getConsoleSender().sendMessage(msg),
+                msg -> Bukkit.getConsoleSender().sendMessage(msg)
+        );
     }
 
 }

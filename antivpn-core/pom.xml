@@ -9,15 +9,15 @@
         <version>1.0.0</version>
     </parent>
 
-    <name>AntiVPN Commons</name>
-    <artifactId>antivpn-commons</artifactId>
+    <name>AntiVPN Core</name>
+    <artifactId>antivpn-core</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>11</java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -33,6 +33,13 @@
                     <useIncrementalCompilation>true</useIncrementalCompilation>
                     <compilerArgument>-parameters</compilerArgument>
                     <encoding>UTF-8</encoding>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.36</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -102,19 +109,9 @@
             <version>4.13.1</version>
         </dependency>
         <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-bungeecord</artifactId>
-            <version>4.3.0</version>
-        </dependency>
-        <dependency>
             <groupId>io.antivpn</groupId>
             <artifactId>serverantivpn-api</artifactId>
-            <version>1.0.16-RELEASE</version>
+            <version>1.1.0-RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

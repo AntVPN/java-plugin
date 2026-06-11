@@ -1,12 +1,11 @@
-package rip.snake.antivpn.commons;
+package rip.snake.antivpn.core;
 
 import io.antivpn.api.AntiVPN;
 import io.antivpn.api.config.AntiVPNConfig;
-import io.antivpn.api.logger.Console;
-import io.antivpn.api.logger.VPNLogger;
+import io.antivpn.api.logging.VPNLogger;
 import lombok.Data;
-import rip.snake.antivpn.commons.config.VPNConfig;
-import rip.snake.antivpn.commons.utils.ConfigUtils;
+import rip.snake.antivpn.core.config.VPNConfig;
+import rip.snake.antivpn.core.utils.ConfigUtils;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -19,7 +18,6 @@ public class Service {
 
     private final Path home;
     private final VPNLogger logger;
-    private final Console console;
     private final String version;
 
     private final Timer timer;
@@ -30,21 +28,18 @@ public class Service {
     public Service(VPNLogger logger, Path home, String version) {
         INSTANCE = this;
 
-        AntiVPNConfig antiVPNConfig = AntiVPNConfig.create();
-
         this.timer = new Timer();
         this.logger = logger;
 
-        this.console = new Console(antiVPNConfig, this.logger);
         this.home = Path.of(home.toString().replaceFirst("serverantivpn", "ServerAntiVPN"));
         this.version = version;
 
-        this.vpnConfig = ConfigUtils.loadConfig(this.home.resolve("config.json"), console);
-        this.vpnConfig.write(antiVPNConfig);
+        this.vpnConfig = ConfigUtils.loadConfig(this.home.resolve("config.json"), logger);
+        AntiVPNConfig antiVPNConfig = this.vpnConfig.toAntiVPNConfig();
         this.saveConfig();
 
         this.antiVPN = AntiVPN.create(
-                "ServerAntiVPN v" + version, this.logger, this.console,
+                "ServerAntiVPN v" + version, this.logger,
                 antiVPNConfig, Duration.ofSeconds(30)
         );
 
@@ -53,7 +48,7 @@ public class Service {
     }
 
     public void onLoad() {
-        this.antiVPN.fireUp();
+        this.antiVPN.start();
     }
 
     public void onDisable() {
@@ -61,6 +56,6 @@ public class Service {
     }
 
     public boolean saveConfig() {
-        return ConfigUtils.writeConfig(this.home.resolve("config.json"), this.console, this.vpnConfig);
+        return ConfigUtils.writeConfig(this.home.resolve("config.json"), this.logger, this.vpnConfig);
     }
 }

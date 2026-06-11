@@ -1,4 +1,4 @@
-package rip.snake.antivpn.commons.config;
+package rip.snake.antivpn.core.config;
 
 import io.antivpn.api.config.AntiVPNConfig;
 import lombok.AllArgsConstructor;
@@ -31,12 +31,14 @@ public class VPNConfig {
         );
     }
 
-    public void write(AntiVPNConfig antiVPNConfig) {
-        antiVPNConfig.setDebug(this.debug);
-        antiVPNConfig.withApiKey(this.secret);
-        antiVPNConfig.setLevel(Level.parse(this.level));
+    public AntiVPNConfig toAntiVPNConfig() {
+        AntiVPNConfig config = AntiVPNConfig.create()
+                .withDebug(this.debug)
+                .withApiKey(this.secret)
+                .withLevel(Level.parse(this.level));
         if (this.endpoint != null) {
-            antiVPNConfig.withEndpoint(this.endpoint);
+            config = config.withEndpoint(this.endpoint);
         }
+        return config;
     }
 }

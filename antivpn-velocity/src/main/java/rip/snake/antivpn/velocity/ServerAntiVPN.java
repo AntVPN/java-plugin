@@ -9,7 +9,7 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
-import rip.snake.antivpn.commons.Service;
+import rip.snake.antivpn.core.Service;
 import rip.snake.antivpn.velocity.commands.AntiVPNCommand;
 import rip.snake.antivpn.velocity.listeners.VelocityPlayerListener;
 import rip.snake.antivpn.velocity.metrics.Metrics;
@@ -39,7 +39,7 @@ public class ServerAntiVPN {
         this.logger = logger;
         this.metricsFactory = metricsFactory;
 
-        this.service = new Service(new SharkLoggerImpl(logger), pluginData, this.version);
+        this.service = new Service(SharkLoggerImpl.create(logger), pluginData, this.version);
     }
 
     @Subscribe

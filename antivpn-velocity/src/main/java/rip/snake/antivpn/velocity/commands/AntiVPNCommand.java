@@ -9,7 +9,8 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import rip.snake.antivpn.commons.Service;
+import rip.snake.antivpn.core.Service;
+import rip.snake.antivpn.core.utils.TokenCommand;
 
 public final class AntiVPNCommand {
 
@@ -20,14 +21,12 @@ public final class AntiVPNCommand {
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("tokenId", StringArgumentType.word())
                         .executes(context -> {
                             String tokenId = context.getArgument("tokenId", String.class);
-                            // Assuming a method processTokenId exists to handle the tokenId
-                            boolean success = processTokenId(tokenId, service);
+                            boolean success = TokenCommand.processToken(tokenId, service);
                             CommandSource source = context.getSource();
-                            if (success) {
-                                source.sendMessage(Component.text("Token processed successfully!", NamedTextColor.GREEN));
-                            } else {
-                                source.sendMessage(Component.text("Failed to process token.", NamedTextColor.RED));
-                            }
+                            source.sendMessage(Component.text(
+                                    success ? "Token processed successfully!" : "Failed to process token.",
+                                    success ? NamedTextColor.GREEN : NamedTextColor.RED
+                            ));
                             return success ? 1 : 0;
                         })
                 )
@@ -35,13 +34,4 @@ public final class AntiVPNCommand {
         return new BrigadierCommand(antivpnNode);
     }
 
-    // Assuming this method exists to handle the tokenId
-    private static boolean processTokenId(String tokenId, Service service) {
-        service.getVpnConfig().setSecret(tokenId);
-
-        service.getAntiVPN().getAntiVPNConfig().withApiKey(tokenId);
-        service.getAntiVPN().getSocketManager().reconnect();
-
-        return service.saveConfig();
-    }
 }

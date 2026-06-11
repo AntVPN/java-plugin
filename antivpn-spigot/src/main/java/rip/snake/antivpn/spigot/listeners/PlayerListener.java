@@ -1,8 +1,7 @@
 package rip.snake.antivpn.spigot.listeners;
 
-import io.antivpn.api.data.socket.request.impl.CheckRequest;
-import io.antivpn.api.data.socket.response.impl.CheckResponse;
-import io.antivpn.api.utils.Event;
+import io.antivpn.api.model.response.CheckResponse;
+import io.antivpn.api.util.Event;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,13 +14,12 @@ import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import rip.snake.antivpn.commons.Service;
-import rip.snake.antivpn.commons.utils.StringUtils;
+import rip.snake.antivpn.core.PlayerData;
+import rip.snake.antivpn.core.Service;
+import rip.snake.antivpn.core.VPNCheckHandler;
 import rip.snake.antivpn.spigot.ServerAntiVPN;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,51 +29,40 @@ public class PlayerListener implements Listener {
 
     private final Service service;
     private final ServerAntiVPN plugin;
-
-    private final Map<UUID, String> sessions = new HashMap<>();
+    private final VPNCheckHandler handler;
 
     public PlayerListener(ServerAntiVPN plugin) {
         this.plugin = plugin;
         this.service = plugin.getService();
+        this.handler = new VPNCheckHandler(service);
     }
 
     @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(AsyncPlayerPreLoginEvent event) {
-        if (event.getResult() != PlayerPreLoginEvent.Result.ALLOWED) {
-            return;
-        }
+        if (event.getResult() != PlayerPreLoginEvent.Result.ALLOWED) return;
         String address = event.getAddress().getHostAddress();
         String userId = event.getUniqueId().toString();
         String username = event.getName();
 
         try {
-            CompletableFuture<CheckResponse> response = this.service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                    .verify(new CheckRequest(StringUtils.cleanAddress(address), userId, username));
+            CompletableFuture<CheckResponse> response = handler.verify(address, event.getUniqueId(), username);
             if (response == null) {
-                this.service.getLogger().error(
-                        "Failed to verify " + event.getName() + " (" + address + ")! Backend is not connected"
-                );
+                this.service.getLogger().error("Failed to verify " + username + " (" + address + ")! Backend is not connected");
                 return;
             }
             CheckResponse result = response.get();
-            if (result == null) {
-                return;
-            }
+            if (result == null) return;
 
             if (result.isAttack()) {
-                event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getShieldKick()));
+                event.setKickMessage(colorize(handler.getShieldKick()));
                 event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
-                return;
+            } else if (result.isValid()) {
+                handler.storeSession(event.getUniqueId(), result.getSessionId());
+            } else {
+                event.setKickMessage(colorize(handler.getDetectKick()));
+                event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
             }
-
-            if (result.isValid()) {
-                this.sessions.put(event.getUniqueId(), result.getSessionId());
-                return;
-            }
-
-            event.setKickMessage(colorize(this.service.getAntiVPN().getSocketManager().getResponseKick()));
-            event.setResult(PlayerPreLoginEvent.Result.KICK_OTHER);
         } catch (Exception e) {
             this.service.getLogger().error("Failed to verify address " + address + "! " + e.getMessage());
             e.printStackTrace();
@@ -89,30 +76,29 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerJoin(PlayerJoinEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_JOIN);
+        handlePlayer(event.getPlayer(), Event.PLAYER_JOIN);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void playerQuit(PlayerQuitEvent event) {
-        this.handlePlayer(event.getPlayer(), Event.PLAYER_QUIT);
+        handlePlayer(event.getPlayer(), Event.PLAYER_QUIT);
     }
 
     private void handlePlayer(Player player, Event event) {
-        boolean isOnlineMode = Bukkit.getOnlineMode();
-        String playerName = player.getName();
-        String userId = player.getUniqueId().toString();
-        String address = player.getAddress().getAddress().getHostAddress();
-
-        // get protocol version
-        String version = String.valueOf(plugin.getVersionHelper().getProtocolVersion(player));
-
         List<MetadataValue> metadatas = player.getMetadata("avpn-hostname");
         String hostname = metadatas == null || metadatas.isEmpty() ? null : metadatas.get(0).asString();
-        String checkId = event == Event.PLAYER_QUIT ? this.sessions.remove(player.getUniqueId()) : this.sessions.get(player.getUniqueId());
 
-        // Send the data to the backend server
-        service.getAntiVPN().getSocketManager().getSocketDataHandler()
-                .sendUserData(checkId, playerName, userId, version, address, null, hostname, event, isOnlineMode);
+        handler.sendUserData(new PlayerData(
+                event == Event.PLAYER_QUIT ? handler.removeSession(player.getUniqueId()) : handler.getSession(player.getUniqueId()),
+                player.getName(),
+                player.getUniqueId().toString(),
+                String.valueOf(plugin.getVersionHelper().getProtocolVersion(player)),
+                player.getAddress().getAddress().getHostAddress(),
+                null,
+                hostname,
+                Bukkit.getOnlineMode(),
+                event
+        ));
     }
 
 }
