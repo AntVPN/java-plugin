@@ -25,6 +25,11 @@ public class AntiVPNCommand extends Command {
 
         if (args.length == 1) {
             String tokenId = args[0];
+            String error = TokenCommand.validateToken(tokenId);
+            if (error != null) {
+                sender.sendMessage(new TextComponent(error));
+                return;
+            }
             boolean success = TokenCommand.processToken(tokenId, service);
             sender.sendMessage(new TextComponent(success ? "Token processed successfully!" : "Failed to process token."));
         } else {

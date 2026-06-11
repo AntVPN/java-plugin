@@ -21,8 +21,13 @@ public final class AntiVPNCommand {
                 .then(RequiredArgumentBuilder.<CommandSource, String>argument("tokenId", StringArgumentType.word())
                         .executes(context -> {
                             String tokenId = context.getArgument("tokenId", String.class);
-                            boolean success = TokenCommand.processToken(tokenId, service);
+                            String error = TokenCommand.validateToken(tokenId);
                             CommandSource source = context.getSource();
+                            if (error != null) {
+                                source.sendMessage(Component.text(error, NamedTextColor.RED));
+                                return 0;
+                            }
+                            boolean success = TokenCommand.processToken(tokenId, service);
                             source.sendMessage(Component.text(
                                     success ? "Token processed successfully!" : "Failed to process token.",
                                     success ? NamedTextColor.GREEN : NamedTextColor.RED

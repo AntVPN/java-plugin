@@ -36,6 +36,12 @@ public final class AntiVPNCommand implements CommandExecutor {
 
         String tokenId = args[0];
 
+        String error = TokenCommand.validateToken(tokenId);
+        if (error != null) {
+            sender.sendMessage(error);
+            return false;
+        }
+
         if (tokenId.equals("check")) {
             return runDebugCheck(1000);
         } else if (tokenId.equalsIgnoreCase("check2")) {
