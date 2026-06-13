@@ -35,7 +35,7 @@
         <!-- Dependencies -->
         <adventure.version>4.13.1</adventure.version>
         <adventure.text.serializer.bungeecord.version>4.3.0</adventure.text.serializer.bungeecord.version>
-        <serverantivpn.api.version>1.1.4-RELEASE</serverantivpn.api.version>
+        <serverantivpn.api.version>1.1.7-RELEASE</serverantivpn.api.version>
         <lombok.version>1.18.36</lombok.version>
         <slf4j.api.version>1.7.30</slf4j.api.version>
         <gson.version>2.10.1</gson.version>
